@@ -23,6 +23,12 @@ export interface CartItem {
   tipo: 'unitario' | 'embalagem';
 }
 
+export interface CustomerCheckoutData {
+  nome: string;
+  contato: string;
+  endereco: string;
+}
+
 export interface CartActions {
   items: CartItem[];
   paymentMethod: PaymentMethod;
@@ -33,7 +39,7 @@ export interface CartActions {
   clearCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;
-  getWhatsAppMessage: () => string;
+  getWhatsAppMessage: (customer: CustomerCheckoutData) => string;
 }
 
 export function useCart(whatsappNumber: string): CartActions {
@@ -101,10 +107,18 @@ export function useCart(whatsappNumber: string): CartActions {
     return items.reduce((count, item) => count + item.quantidade, 0);
   }, [items]);
 
-  const getWhatsAppMessage = useCallback(() => {
+  const getWhatsAppMessage = useCallback((customer: CustomerCheckoutData) => {
     if (items.length === 0) return '';
 
     let message = `Olá! Gostaria de fazer o seguinte pedido:\n\n`;
+
+    // Customer info
+    message += `📋 *DADOS DO CLIENTE*\n`;
+    message += `👤 Nome: ${customer.nome}\n`;
+    message += `📞 Contato: ${customer.contato}\n`;
+    message += `📍 Endereço: ${customer.endereco}\n\n`;
+
+    message += `🛒 *ITENS DO PEDIDO*\n\n`;
 
     items.forEach((item, index) => {
       const price = item.tipo === 'embalagem' ? item.preco_embalagem : item.preco_unitario;

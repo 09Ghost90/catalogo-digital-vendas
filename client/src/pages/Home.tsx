@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal, UserPlus, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import CartDrawer from '@/components/CartDrawer';
 import { useCart } from '@/hooks/useCart';
+import { useCustomer } from '@/hooks/useCustomer';
+import type { CustomerProfile } from '@/hooks/useCustomer';
 import { toast } from 'sonner';
 import catalogData from '../../../produtos.json';
 
@@ -47,7 +49,10 @@ export default function Home() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const cart = useCart(data.whatsapp);
+  const customer = useCustomer();
   const allCategories = Object.keys(data.categorias).sort();
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState<CustomerProfile>(customer.profile);
 
   const filteredProducts = useMemo(() => {
     let products: Produto[] = [];
@@ -109,8 +114,76 @@ export default function Home() {
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleSaveProfile = () => {
+    if (!profileForm.nome.trim() || !profileForm.contato.trim() || !profileForm.endereco.trim()) {
+      toast.error('Nome, contato e endereço são obrigatórios');
+      return;
+    }
+    customer.saveProfile(profileForm);
+    setProfileModalOpen(false);
+    toast.success('Perfil salvo com sucesso!');
+  };
+
+  const openProfileModal = () => {
+    setProfileForm(customer.profile);
+    setProfileModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
+      {/* Profile Modal */}
+      {profileModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setProfileModalOpen(false)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <UserPlus size={18} className="text-blue-600" />
+                {customer.hasProfile ? 'Editar Perfil' : 'Criar Perfil de Cliente'}
+              </h2>
+              <button onClick={() => setProfileModalOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Seus dados serão preenchidos automaticamente na hora do pedido.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome (ou nome da empresa) *</label>
+                <Input value={profileForm.nome} onChange={(e) => setProfileForm({...profileForm, nome: e.target.value})} placeholder="Seu nome" className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contato (WhatsApp) *</label>
+                <Input value={profileForm.contato} onChange={(e) => setProfileForm({...profileForm, contato: e.target.value})} placeholder="(00) 00000-0000" className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Endereço de entrega *</label>
+                <textarea value={profileForm.endereco} onChange={(e) => setProfileForm({...profileForm, endereco: e.target.value})} placeholder="Rua, número, bairro, cidade..." rows={2} className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Horário preferencial de entrega</label>
+                <Input value={profileForm.horarioEntrega} onChange={(e) => setProfileForm({...profileForm, horarioEntrega: e.target.value})} placeholder="Ex: 8h às 12h" className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pessoa responsável pelo recebimento</label>
+                <Input value={profileForm.responsavelRecebimento} onChange={(e) => setProfileForm({...profileForm, responsavelRecebimento: e.target.value})} placeholder="Com quem tratar" className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
+                <textarea value={profileForm.observacoes} onChange={(e) => setProfileForm({...profileForm, observacoes: e.target.value})} placeholder="Informações adicionais..." rows={2} className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5">
+              <Button variant="outline" onClick={() => setProfileModalOpen(false)} className="flex-1 rounded-xl">Cancelar</Button>
+              <Button onClick={handleSaveProfile} className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">Salvar Perfil</Button>
+            </div>
+            {customer.hasProfile && (
+              <button onClick={() => { customer.clearProfile(); setProfileForm({nome:'',contato:'',endereco:'',horarioEntrega:'',responsavelRecebimento:'',observacoes:''}); toast.success('Perfil removido'); }} className="w-full text-center text-xs text-red-400 hover:text-red-500 mt-3 transition-colors">
+                Remover meu perfil
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-sm border-b border-blue-100 dark:border-slate-800 transition-colors duration-300">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
@@ -146,6 +219,35 @@ export default function Home() {
               </button>
               <ThemeToggle />
             </div>
+          </div>
+
+          {/* Profile Banner */}
+          <div className="mb-3">
+            {customer.hasProfile ? (
+              <button
+                onClick={openProfileModal}
+                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/10 dark:to-green-900/10 border border-blue-200/50 dark:border-slate-700 hover:shadow-sm transition-all text-left group"
+              >
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Olá, <span className="font-semibold text-blue-600 dark:text-blue-400">{customer.profile.nome.split(' ')[0]}</span>! 👋
+                </span>
+                <span className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-1 group-hover:underline">
+                  <Edit3 size={12} /> Editar perfil
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={openProfileModal}
+                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/10 dark:to-green-900/10 border border-blue-200/50 dark:border-slate-700 hover:shadow-sm transition-all text-left group"
+              >
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-medium text-blue-600 dark:text-blue-400">Crie seu perfil</span> para agilizar seus pedidos
+                </span>
+                <span className="text-xs text-blue-500 flex items-center gap-1 group-hover:underline">
+                  <UserPlus size={12} /> Criar
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Search Bar */}
@@ -467,6 +569,7 @@ export default function Home() {
         open={cartOpen}
         onOpenChange={setCartOpen}
         whatsappNumber={data.whatsapp}
+        customerProfile={customer.profile}
       />
     </div>
   );
