@@ -1,0 +1,1289 @@
+{
+  "empresa": "Armarinhos Pereira",
+  "whatsapp": "34 993350642",
+  "categoryImages": {
+    "Acessórios e Vedantes": "/imagens_categorias/acessórios_e_vedantes_0001.jpg",
+    "Agulhas e Costura": "/imagens_categorias/agulhas_e_costura_0001.jpg",
+    "Artigos de Festa": "/imagens_categorias/artigos_de_festa_0001.jpg",
+    "Baterias e Energia": "/imagens_categorias/baterias_e_energia_0001.jpg",
+    "Higiene e Beleza": "/imagens_categorias/higiene_e_beleza_0001.jpg",
+    "Material Elétrico": "/imagens_categorias/material_elétrico_0001.jpg",
+    "Outros Produtos": "/imagens_categorias/outros_produtos_0001.jpg"
+  },
+  "categorias": {
+    "Acessórios e Vedantes": [
+      {
+        "id": 1,
+        "nome": "Borracha p/ P. de Pressão 7 Lts. Explendor Mult-Us...",
+        "nome_completo": "Borracha p/ P. de Pressão 7 Lts. Explendor Mult-Uso",
+        "categoria": "Acessórios e Vedantes",
+        "preco_unitario": 2.5,
+        "preco_embalagem": 30,
+        "unidade": "Dz.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/borracha_para_panela_de_pressão_l/000001.jpg",
+          "/imagens/borracha_para_panela_de_pressão_l/000002.jpg"
+        ]
+      },
+      {
+        "id": 2,
+        "nome": "Vedante p/ Torneira Silic.   1/2                20...",
+        "nome_completo": "Vedante p/ Torneira Silic.   1/2                200x1",
+        "categoria": "Acessórios e Vedantes",
+        "preco_unitario": 0.32,
+        "preco_embalagem": 65.5,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/vedante_para_torneira_silicone/000001.jpg",
+          "/imagens/vedante_para_torneira_silicone/000002.jpg"
+        ]
+      },
+      {
+        "id": 3,
+        "nome": "Abraçadeira 1/2                                   ...",
+        "nome_completo": "Abraçadeira 1/2                                                 10x1",
+        "categoria": "Acessórios e Vedantes",
+        "preco_unitario": 2.5,
+        "preco_embalagem": 25,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/abraçadeira/000001.jpg",
+          "/imagens/abraçadeira/000002.jpg"
+        ]
+      },
+      {
+        "id": 4,
+        "nome": "Borracha p/ Dinheiro 30 unidades cd. 10x1",
+        "nome_completo": "Borracha p/ Dinheiro 30 unidades cd. 10x1",
+        "categoria": "Acessórios e Vedantes",
+        "preco_unitario": 1.95,
+        "preco_embalagem": 19.5,
+        "unidade": "d",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/borracha_para_dinheiro/000001.jpg",
+          "/imagens/borracha_para_dinheiro/000002.jpg"
+        ]
+      }
+    ],
+    "Agulhas e Costura": [
+      {
+        "id": 1,
+        "nome": "Agulha \"Agulheiro Cestinha \" 12x1",
+        "nome_completo": "Agulha \"Agulheiro Cestinha \" 12x1",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 2,
+        "preco_embalagem": 24,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/agulha_agulheiro_cestinha/000001.jpg",
+          "/imagens/agulha_agulheiro_cestinha/000002.jpg"
+        ]
+      },
+      {
+        "id": 2,
+        "nome": "Agulha p/ desintupir Fogão 50x1",
+        "nome_completo": "Agulha p/ desintupir Fogão 50x1",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 0.5,
+        "preco_embalagem": 25,
+        "unidade": "Dz.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/agulha_para_desentupir_fogão/000001.jpg",
+          "/imagens/agulha_para_desentupir_fogão/000002.jpg"
+        ]
+      },
+      {
+        "id": 3,
+        "nome": "Agulha Mão Corrente nº 06 20x1",
+        "nome_completo": "Agulha Mão Corrente nº 06 20x1",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 0.7,
+        "preco_embalagem": 14,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/agulha_mão_corrente/000001.jpg",
+          "/imagens/agulha_mão_corrente/000002.jpg"
+        ]
+      },
+      {
+        "id": 4,
+        "nome": "Agulha P/ Máquina Singer nº 14 10x1",
+        "nome_completo": "Agulha P/ Máquina Singer nº 14 10x1",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 1.4,
+        "preco_embalagem": 14,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/agulha_para_máquina_singer/000001.jpg",
+          "/imagens/agulha_para_máquina_singer/000002.jpg"
+        ]
+      },
+      {
+        "id": 5,
+        "nome": "Linha n° 10  p/ pipa  182Mts. Unilinhas",
+        "nome_completo": "Linha n° 10  p/ pipa  182Mts. Unilinhas",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 4.35,
+        "preco_embalagem": 52.2,
+        "unidade": "Dz.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/linha_para_pipa_m/000001.jpg",
+          "/imagens/linha_para_pipa_m/000002.jpg"
+        ]
+      },
+      {
+        "id": 6,
+        "nome": "Linha p/ Costura  \"Magna\"  Sortida IV   10x1",
+        "nome_completo": "Linha p/ Costura  \"Magna\"  Sortida IV   10x1",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 1.75,
+        "preco_embalagem": 17.5,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/linha_para_costura_magna_sortida/000001.jpg",
+          "/imagens/linha_para_costura_magna_sortida/000002.jpg"
+        ]
+      },
+      {
+        "id": 7,
+        "nome": "Linha p/ Costura  \"Magna\"  Azul Marinho   1282  10...",
+        "nome_completo": "Linha p/ Costura  \"Magna\"  Azul Marinho   1282  10x1",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 1.75,
+        "preco_embalagem": 17.5,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/linha_para_costura_magna_azul_marinho/000001.jpg",
+          "/imagens/linha_para_costura_magna_azul_marinho/000002.jpg"
+        ]
+      },
+      {
+        "id": 8,
+        "nome": "Linha p/ Costura  \"Magna\"  Azul Claro    1149  10x...",
+        "nome_completo": "Linha p/ Costura  \"Magna\"  Azul Claro    1149  10x1",
+        "categoria": "Agulhas e Costura",
+        "preco_unitario": 1.75,
+        "preco_embalagem": 17.5,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/linha_para_costura_magna_azul_claro/000001.jpg",
+          "/imagens/linha_para_costura_magna_azul_claro/000002.jpg"
+        ]
+      }
+    ],
+    "Artigos de Festa": [
+      {
+        "id": 1,
+        "nome": "Balão p/ Festa Colorido 10x8 nº 6.5",
+        "nome_completo": "Balão p/ Festa Colorido 10x8 nº 6.5",
+        "categoria": "Artigos de Festa",
+        "preco_unitario": 1.75,
+        "preco_embalagem": 17.5,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/balão_para_festa_colorido/000001.jpg",
+          "/imagens/balão_para_festa_colorido/000002.jpg"
+        ]
+      },
+      {
+        "id": 2,
+        "nome": "Baralho de Plástico 6x2   Original",
+        "nome_completo": "Baralho de Plástico 6x2   Original",
+        "categoria": "Artigos de Festa",
+        "preco_unitario": 10.9,
+        "preco_embalagem": 65.5,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/baralho_de_plástico_original/000001.jpg",
+          "/imagens/baralho_de_plástico_original/000002.jpg"
+        ]
+      }
+    ],
+    "Baterias e Energia": [
+      {
+        "id": 1,
+        "nome": "Bateria 9V Alfacel 12x1",
+        "nome_completo": "Bateria 9V Alfacel 12x1",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 5,
+        "preco_embalagem": 60,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/bateria_v_alfacel/000001.jpg",
+          "/imagens/bateria_v_alfacel/000002.jpg"
+        ]
+      },
+      {
+        "id": 2,
+        "nome": "Bateria 9V Alfacel - SM -",
+        "nome_completo": "Bateria 9V Alfacel - SM -",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 6.5,
+        "preco_embalagem": 6.5,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/bateria_v_alfacel_sm/000001.jpg",
+          "/imagens/bateria_v_alfacel_sm/000002.jpg"
+        ]
+      },
+      {
+        "id": 3,
+        "nome": "Bateria 9V Hw 10x1",
+        "nome_completo": "Bateria 9V Hw 10x1",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 4.5,
+        "preco_embalagem": 45,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/bateria_v_hw/000001.jpg",
+          "/imagens/bateria_v_hw/000002.jpg"
+        ]
+      },
+      {
+        "id": 4,
+        "nome": "Bateria Alfacel 2032  5x1",
+        "nome_completo": "Bateria Alfacel 2032  5x1",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 3.5,
+        "preco_embalagem": 17.5,
+        "unidade": "Ct",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/bateria_alfacel/000001.jpg",
+          "/imagens/bateria_alfacel/000002.jpg"
+        ]
+      },
+      {
+        "id": 5,
+        "nome": "Bateria Alfacel Ag 23 / LR 44  5x1",
+        "nome_completo": "Bateria Alfacel Ag 23 / LR 44  5x1",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 1.8,
+        "preco_embalagem": 9,
+        "unidade": "Ct",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/bateria_alfacel_ag_lr/000001.jpg",
+          "/imagens/bateria_alfacel_ag_lr/000002.jpg"
+        ]
+      },
+      {
+        "id": 6,
+        "nome": "Pilha comum Alfacel Peq.       AA       40x1",
+        "nome_completo": "Pilha comum Alfacel Peq.       AA       40x1",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 0.89,
+        "preco_embalagem": 35.8,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pilha_comum_alfacel_aa/000001.jpg",
+          "/imagens/pilha_comum_alfacel_aa/000002.jpg"
+        ]
+      },
+      {
+        "id": 7,
+        "nome": "Pilha comum Alfacel Peq.       AA       60x1",
+        "nome_completo": "Pilha comum Alfacel Peq.       AA       60x1",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 0.89,
+        "preco_embalagem": 53.8,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pilha_comum_alfacel_aa/000001.jpg",
+          "/imagens/pilha_comum_alfacel_aa/000002.jpg"
+        ]
+      },
+      {
+        "id": 8,
+        "nome": "Pilha comum Alfacel Palito    AAA       60x1",
+        "nome_completo": "Pilha comum Alfacel Palito    AAA       60x1",
+        "categoria": "Baterias e Energia",
+        "preco_unitario": 0.89,
+        "preco_embalagem": 53.8,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pilha_comum_alfacel_palito_aaa/000001.jpg",
+          "/imagens/pilha_comum_alfacel_palito_aaa/000002.jpg"
+        ]
+      }
+    ],
+    "Higiene e Beleza": [
+      {
+        "id": 1,
+        "nome": "Aparelho de Barba c/ Lamina",
+        "nome_completo": "Aparelho de Barba c/ Lamina",
+        "categoria": "Higiene e Beleza",
+        "preco_unitario": 7.2,
+        "preco_embalagem": 7.2,
+        "unidade": "Unid",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/aparelho_de_barba_com_lâmina/000001.jpg",
+          "/imagens/aparelho_de_barba_com_lâmina/000002.jpg"
+        ]
+      },
+      {
+        "id": 2,
+        "nome": "Pincel p/ Barba Skich  - SM -",
+        "nome_completo": "Pincel p/ Barba Skich  - SM -",
+        "categoria": "Higiene e Beleza",
+        "preco_unitario": 8.9,
+        "preco_embalagem": 8.9,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pincel_para_barba_skich/000001.jpg",
+          "/imagens/pincel_para_barba_skich/000002.jpg"
+        ]
+      }
+    ],
+    "Material Elétrico": [
+      {
+        "id": 1,
+        "nome": "Pino P/ Panela de Pressão Universal   - SM -",
+        "nome_completo": "Pino P/ Panela de Pressão Universal   - SM -",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 6.25,
+        "preco_embalagem": 6.25,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pino_para_panela_de_pressão_universal/000001.jpg",
+          "/imagens/pino_para_panela_de_pressão_universal/000002.jpg"
+        ]
+      },
+      {
+        "id": 2,
+        "nome": "Extensão FC   03mts. -SM -",
+        "nome_completo": "Extensão FC   03mts. -SM -",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 19.8,
+        "preco_embalagem": 19.8,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/extensão_fc_m/000001.jpg",
+          "/imagens/extensão_fc_m/000002.jpg"
+        ]
+      },
+      {
+        "id": 3,
+        "nome": "Extensão FC   03mts. -SM -",
+        "nome_completo": "Extensão FC   03mts. -SM -",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 19.8,
+        "preco_embalagem": 19.8,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/extensão_fc_m/000001.jpg",
+          "/imagens/extensão_fc_m/000002.jpg"
+        ]
+      },
+      {
+        "id": 4,
+        "nome": "Extensão FC   05mts. -SM -",
+        "nome_completo": "Extensão FC   05mts. -SM -",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 26.8,
+        "preco_embalagem": 26.8,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/extensão_fc_m/000001.jpg",
+          "/imagens/extensão_fc_m/000002.jpg"
+        ]
+      },
+      {
+        "id": 5,
+        "nome": "Extensão FC   10mts. -SM -",
+        "nome_completo": "Extensão FC   10mts. -SM -",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 38.8,
+        "preco_embalagem": 38.8,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/extensão_fc_m/000001.jpg",
+          "/imagens/extensão_fc_m/000002.jpg"
+        ]
+      },
+      {
+        "id": 6,
+        "nome": "Fita Isolante Anti-Chama   05mts.                 ...",
+        "nome_completo": "Fita Isolante Anti-Chama   05mts.                       10x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 2.3,
+        "preco_embalagem": 23,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/fita_crepe_mm_x_m/000001.jpg",
+          "/imagens/fita_crepe_mm_x_m/000002.jpg"
+        ]
+      },
+      {
+        "id": 7,
+        "nome": "Pino Adpitador  20 A                              ...",
+        "nome_completo": "Pino Adpitador  20 A                                      10x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 3.95,
+        "preco_embalagem": 39.5,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pino_adaptador_a/000001.jpg",
+          "/imagens/pino_adaptador_a/000002.jpg"
+        ]
+      },
+      {
+        "id": 8,
+        "nome": "Pino 3 Saída \" T \" Compolux Colorido              ...",
+        "nome_completo": "Pino 3 Saída \" T \" Compolux Colorido                10x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 3.99,
+        "preco_embalagem": 39.9,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pi_saídas_t_colorido/000001.jpg",
+          "/imagens/pi_saídas_t_colorido/000002.jpg"
+        ]
+      },
+      {
+        "id": 9,
+        "nome": "Pino Femea Modelo Novo   3 Furo                   ...",
+        "nome_completo": "Pino Femea Modelo Novo   3 Furo                    10x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 3.99,
+        "preco_embalagem": 39.9,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pino_fêmea_modelo_novo_furos/000001.jpg",
+          "/imagens/pino_fêmea_modelo_novo_furos/000002.jpg"
+        ]
+      },
+      {
+        "id": 10,
+        "nome": "Pino Macho Maciço 10 A                            ...",
+        "nome_completo": "Pino Macho Maciço 10 A                                10x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 5.5,
+        "preco_embalagem": 55,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pino_macho_maciço_a/000001.jpg",
+          "/imagens/pino_macho_maciço_a/000002.jpg"
+        ]
+      },
+      {
+        "id": 11,
+        "nome": "Pino Macho Maciço 20 A                            ...",
+        "nome_completo": "Pino Macho Maciço 20 A                                10x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 6.25,
+        "preco_embalagem": 62.5,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pino_macho_maciço_a/000001.jpg",
+          "/imagens/pino_macho_maciço_a/000002.jpg"
+        ]
+      },
+      {
+        "id": 12,
+        "nome": "Placa 1 Interrupetor  Bca / Cinza",
+        "nome_completo": "Placa 1 Interrupetor  Bca / Cinza",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 7.9,
+        "preco_embalagem": 7.9,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/placa_interruptor_brancacinza/000001.jpg",
+          "/imagens/placa_interruptor_brancacinza/000002.jpg"
+        ]
+      },
+      {
+        "id": 13,
+        "nome": "Placa Tomada + 1 Interruptor Bca / Cinza",
+        "nome_completo": "Placa Tomada + 1 Interruptor Bca / Cinza",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 14.9,
+        "preco_embalagem": 14.9,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/placa_tomada_interruptor_brancacinza/000001.jpg",
+          "/imagens/placa_tomada_interruptor_brancacinza/000002.jpg"
+        ]
+      },
+      {
+        "id": 14,
+        "nome": "Placa Tomada Bca / Cinza",
+        "nome_completo": "Placa Tomada Bca / Cinza",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 7.9,
+        "preco_embalagem": 7.9,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/placa_tomada_brancacinza/000001.jpg",
+          "/imagens/placa_tomada_brancacinza/000002.jpg"
+        ]
+      },
+      {
+        "id": 15,
+        "nome": "Soquete Pino Portal p/ Lâmpada                    ...",
+        "nome_completo": "Soquete Pino Portal p/ Lâmpada                    05x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 6,
+        "preco_embalagem": 30,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/soquete_pino_portal_para_lâmpada/000001.jpg",
+          "/imagens/soquete_pino_portal_para_lâmpada/000002.jpg"
+        ]
+      },
+      {
+        "id": 16,
+        "nome": "Soquete c/ Rabico FC                              ...",
+        "nome_completo": "Soquete c/ Rabico FC                                 10x1",
+        "categoria": "Material Elétrico",
+        "preco_unitario": 4.25,
+        "preco_embalagem": 42.5,
+        "unidade": "Ct",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/soquete_com_rabicho_fc/000001.jpg",
+          "/imagens/soquete_com_rabicho_fc/000002.jpg"
+        ]
+      }
+    ],
+    "Outros Produtos": [
+      {
+        "id": 1,
+        "nome": "Cadeado Tri-Cicle n° 25",
+        "nome_completo": "Cadeado Tri-Cicle n° 25",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 13.5,
+        "preco_embalagem": 13.5,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/cadeado_tricicle/000001.jpg",
+          "/imagens/cadeado_tricicle/000002.jpg"
+        ]
+      },
+      {
+        "id": 2,
+        "nome": "Cadeado Tri-Cicle n° 32",
+        "nome_completo": "Cadeado Tri-Cicle n° 32",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 18.5,
+        "preco_embalagem": 18.5,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/cadeado_tricicle/000001.jpg",
+          "/imagens/cadeado_tricicle/000002.jpg"
+        ]
+      },
+      {
+        "id": 3,
+        "nome": "Cadeado Tri-Cicle n° 38",
+        "nome_completo": "Cadeado Tri-Cicle n° 38",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 23.9,
+        "preco_embalagem": 23.9,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/cadeado_tricicle/000001.jpg",
+          "/imagens/cadeado_tricicle/000002.jpg"
+        ]
+      },
+      {
+        "id": 4,
+        "nome": "Caderneta de Apontamento   40x1",
+        "nome_completo": "Caderneta de Apontamento   40x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1,
+        "preco_embalagem": 40,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/caderneta_de_apontamento/000001.jpg",
+          "/imagens/caderneta_de_apontamento/000002.jpg"
+        ]
+      },
+      {
+        "id": 5,
+        "nome": "Chupeta Pepeta de Silicone Redondo  25x1",
+        "nome_completo": "Chupeta Pepeta de Silicone Redondo  25x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 2.8,
+        "preco_embalagem": 70,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/chupeta_pepeta_de_silicone_redonda/000001.jpg",
+          "/imagens/chupeta_pepeta_de_silicone_redonda/000002.jpg"
+        ]
+      },
+      {
+        "id": 6,
+        "nome": "Escova p/ vaso Sanitário com suporte",
+        "nome_completo": "Escova p/ vaso Sanitário com suporte",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 8,
+        "preco_embalagem": 8,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/escova_para_vaso_sanitário_com_suporte/000001.jpg",
+          "/imagens/escova_para_vaso_sanitário_com_suporte/000002.jpg"
+        ]
+      },
+      {
+        "id": 7,
+        "nome": "Espeto p/ Churrasco 50cm  40x1",
+        "nome_completo": "Espeto p/ Churrasco 50cm  40x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 4.5,
+        "preco_embalagem": 4.5,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/espeto_para_churrasco/000001.jpg",
+          "/imagens/espeto_para_churrasco/000002.jpg"
+        ]
+      },
+      {
+        "id": 8,
+        "nome": "Etiqueta p/ Preço n° 02 - 13mts gde.  5x1 Menor",
+        "nome_completo": "Etiqueta p/ Preço n° 02 - 13mts gde.  5x1 Menor",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 4.4,
+        "preco_embalagem": 22,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/etiqueta_para_preço_mts/000001.jpg",
+          "/imagens/etiqueta_para_preço_mts/000002.jpg"
+        ]
+      },
+      {
+        "id": 9,
+        "nome": "Faca p/ Mesa Recife  6x1",
+        "nome_completo": "Faca p/ Mesa Recife  6x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 2,
+        "preco_embalagem": 12,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/faca_para_mesa_recife/000001.jpg",
+          "/imagens/faca_para_mesa_recife/000002.jpg"
+        ]
+      },
+      {
+        "id": 10,
+        "nome": "Filtro Permanente p/ Café  n° 102   6x1",
+        "nome_completo": "Filtro Permanente p/ Café  n° 102   6x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 3.95,
+        "preco_embalagem": 23.7,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/filtro_permanente_para_café/000001.jpg",
+          "/imagens/filtro_permanente_para_café/000002.jpg"
+        ]
+      },
+      {
+        "id": 11,
+        "nome": "Fita Crepe Fit-pel 48mmx50mts.     6x1",
+        "nome_completo": "Fita Crepe Fit-pel 48mmx50mts.     6x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 5.95,
+        "preco_embalagem": 35.7,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/fita_crepe_mm_x_m/000001.jpg",
+          "/imagens/fita_crepe_mm_x_m/000002.jpg"
+        ]
+      },
+      {
+        "id": 12,
+        "nome": "Flanela Amarela - SM -  28x38",
+        "nome_completo": "Flanela Amarela - SM -  28x38",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 3.9,
+        "preco_embalagem": 46.8,
+        "unidade": "Dz.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/flanela_amarela_sm/000001.jpg",
+          "/imagens/flanela_amarela_sm/000002.jpg"
+        ]
+      },
+      {
+        "id": 13,
+        "nome": "Lápis para Marceneiro",
+        "nome_completo": "Lápis para Marceneiro",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.3,
+        "preco_embalagem": 15.6,
+        "unidade": "Dz.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/lápis_para_marceneiro/000001.jpg",
+          "/imagens/lápis_para_marceneiro/000002.jpg"
+        ]
+      },
+      {
+        "id": 14,
+        "nome": "Luva Domestica Forrada  Peq. / Média / Gde.",
+        "nome_completo": "Luva Domestica Forrada  Peq. / Média / Gde.",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 6.3,
+        "preco_embalagem": 6.3,
+        "unidade": "Pr",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/luva_doméstica_forrada/000001.jpg",
+          "/imagens/luva_doméstica_forrada/000002.jpg"
+        ]
+      },
+      {
+        "id": 15,
+        "nome": "Mamadeira Decorada Bico Silicone 240ml  - SM -",
+        "nome_completo": "Mamadeira Decorada Bico Silicone 240ml  - SM -",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 8,
+        "preco_embalagem": 8,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/mamadeira_decorada_bico_silicone/000001.jpg",
+          "/imagens/mamadeira_decorada_bico_silicone/000002.jpg"
+        ]
+      },
+      {
+        "id": 16,
+        "nome": "Palito gde. p/ Unha Land`s              50x1",
+        "nome_completo": "Palito gde. p/ Unha Land`s              50x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 0.49,
+        "preco_embalagem": 24.5,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/palito_para_unha_lands/000001.jpg",
+          "/imagens/palito_para_unha_lands/000002.jpg"
+        ]
+      },
+      {
+        "id": 17,
+        "nome": "Pente 3 Carreiras                               24...",
+        "nome_completo": "Pente 3 Carreiras                               24x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 2,
+        "preco_embalagem": 48,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pente_carreiras/000001.jpg",
+          "/imagens/pente_carreiras/000002.jpg"
+        ]
+      },
+      {
+        "id": 18,
+        "nome": "Pincel p/ Pintar Cabelo c/ Pente        - SM -",
+        "nome_completo": "Pincel p/ Pintar Cabelo c/ Pente        - SM -",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 7.25,
+        "preco_embalagem": 7.25,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pincel_para_pintar_cabelo_com_pente/000001.jpg",
+          "/imagens/pincel_para_pintar_cabelo_com_pente/000002.jpg"
+        ]
+      },
+      {
+        "id": 19,
+        "nome": "Pincel p/ Pintar Cabelo s/ Pente        - SM -",
+        "nome_completo": "Pincel p/ Pintar Cabelo s/ Pente        - SM -",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 6,
+        "preco_embalagem": 6,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pincel_para_pintar_cabelo_com_pente/000001.jpg",
+          "/imagens/pincel_para_pintar_cabelo_com_pente/000002.jpg"
+        ]
+      },
+      {
+        "id": 20,
+        "nome": "Pinça Lamar e Sekich           12x1     - SM -",
+        "nome_completo": "Pinça Lamar e Sekich           12x1     - SM -",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1,
+        "preco_embalagem": 12,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pinça_lamar_e_sekich/000001.jpg",
+          "/imagens/pinça_lamar_e_sekich/000002.jpg"
+        ]
+      },
+      {
+        "id": 21,
+        "nome": "Pinça Merehje                    12x1      - SM -",
+        "nome_completo": "Pinça Merehje                    12x1      - SM -",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.85,
+        "preco_embalagem": 22.2,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pinça_lamar_e_sekich/000001.jpg",
+          "/imagens/pinça_lamar_e_sekich/000002.jpg"
+        ]
+      },
+      {
+        "id": 22,
+        "nome": "Pinça Solire Importad Gde.   12x1      - SM -",
+        "nome_completo": "Pinça Solire Importad Gde.   12x1      - SM -",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.1,
+        "preco_embalagem": 13.2,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pinça_solire_importada_grande/000001.jpg",
+          "/imagens/pinça_solire_importada_grande/000002.jpg"
+        ]
+      },
+      {
+        "id": 23,
+        "nome": "Pipa Média c/ 25 unidades",
+        "nome_completo": "Pipa Média c/ 25 unidades",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 2.6,
+        "preco_embalagem": 65,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pipa_média/000001.jpg",
+          "/imagens/pipa_média/000002.jpg"
+        ]
+      },
+      {
+        "id": 24,
+        "nome": "Ratoeira Ninja Peq.    - SM -          3x1",
+        "nome_completo": "Ratoeira Ninja Peq.    - SM -          3x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 4.6,
+        "preco_embalagem": 13.8,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/ratoeira_ninja_pequena/000001.jpg",
+          "/imagens/ratoeira_ninja_pequena/000002.jpg"
+        ]
+      },
+      {
+        "id": 25,
+        "nome": "Refil Tinteiro p/ Etiquetadora  - M. 14 e MX. 5.50...",
+        "nome_completo": "Refil Tinteiro p/ Etiquetadora  - M. 14 e MX. 5.500 2x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 7,
+        "preco_embalagem": 14,
+        "unidade": "Pr",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/refil_tinteiro_para_etiquetadora/000001.jpg",
+          "/imagens/refil_tinteiro_para_etiquetadora/000002.jpg"
+        ]
+      },
+      {
+        "id": 26,
+        "nome": "Adaptador   3/4                                  ...",
+        "nome_completo": "Adaptador   3/4                                      10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.8,
+        "preco_embalagem": 18,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/adaptador/000001.jpg",
+          "/imagens/adaptador/000002.jpg"
+        ]
+      },
+      {
+        "id": 27,
+        "nome": "Arejador p/ Torneira                              ...",
+        "nome_completo": "Arejador p/ Torneira                                   5x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 6,
+        "preco_embalagem": 30,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/arejador_para_torneira/000001.jpg",
+          "/imagens/arejador_para_torneira/000002.jpg"
+        ]
+      },
+      {
+        "id": 28,
+        "nome": "Bucha c/ gancho n° 08                             ...",
+        "nome_completo": "Bucha c/ gancho n° 08                              10x2",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 2.6,
+        "preco_embalagem": 26,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/bucha_com_gancho/000001.jpg",
+          "/imagens/bucha_com_gancho/000002.jpg"
+        ]
+      },
+      {
+        "id": 29,
+        "nome": "Bucha c/ gancho n° 10                             ...",
+        "nome_completo": "Bucha c/ gancho n° 10                              10x2",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 2.8,
+        "preco_embalagem": 28,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/bucha_com_gancho/000001.jpg",
+          "/imagens/bucha_com_gancho/000002.jpg"
+        ]
+      },
+      {
+        "id": 30,
+        "nome": "Cotovelo  L/R     3/4  p/  1/2                    ...",
+        "nome_completo": "Cotovelo  L/R     3/4  p/  1/2                       10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 4.5,
+        "preco_embalagem": 45,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/cotovelo_lr_para/000001.jpg",
+          "/imagens/cotovelo_lr_para/000002.jpg"
+        ]
+      },
+      {
+        "id": 31,
+        "nome": "Estopa Bca. Flanelim  130grs.                     ...",
+        "nome_completo": "Estopa Bca. Flanelim  130grs.                        6x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 3.75,
+        "preco_embalagem": 22.5,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/estopa_branca_flanelim_g/000001.jpg",
+          "/imagens/estopa_branca_flanelim_g/000002.jpg"
+        ]
+      },
+      {
+        "id": 32,
+        "nome": "Engate de Pvc p/ pia   40cm",
+        "nome_completo": "Engate de Pvc p/ pia   40cm",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 7.6,
+        "preco_embalagem": 7.6,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/engate_de_pvc_para_pia/000001.jpg",
+          "/imagens/engate_de_pvc_para_pia/000002.jpg"
+        ]
+      },
+      {
+        "id": 33,
+        "nome": "Luva   L/R     3/4  p/  1/2                       ...",
+        "nome_completo": "Luva   L/R     3/4  p/  1/2                              10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 3.75,
+        "preco_embalagem": 37.5,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/luva_lr_para/000001.jpg",
+          "/imagens/luva_lr_para/000002.jpg"
+        ]
+      },
+      {
+        "id": 34,
+        "nome": "Parafuso p/ bucha  n° 06                          ...",
+        "nome_completo": "Parafuso p/ bucha  n° 06                             6x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.8,
+        "preco_embalagem": 18,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/parafuso_para_bucha/000001.jpg",
+          "/imagens/parafuso_para_bucha/000002.jpg"
+        ]
+      },
+      {
+        "id": 35,
+        "nome": "Pregos  17x21    33grs.                           ...",
+        "nome_completo": "Pregos  17x21    33grs.                             10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.8,
+        "preco_embalagem": 18,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pregos/000001.jpg",
+          "/imagens/pregos/000002.jpg"
+        ]
+      },
+      {
+        "id": 36,
+        "nome": "Pregos  18x27    33grs.                           ...",
+        "nome_completo": "Pregos  18x27    33grs.                             10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.8,
+        "preco_embalagem": 18,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pregos/000001.jpg",
+          "/imagens/pregos/000002.jpg"
+        ]
+      },
+      {
+        "id": 37,
+        "nome": "Pregos  20x30    33grs.                           ...",
+        "nome_completo": "Pregos  20x30    33grs.                             10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 1.8,
+        "preco_embalagem": 18,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/pregos/000001.jpg",
+          "/imagens/pregos/000002.jpg"
+        ]
+      },
+      {
+        "id": 38,
+        "nome": "Rolo p/ Pintura de Espuma                         ...",
+        "nome_completo": "Rolo p/ Pintura de Espuma                         05cm",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 3.9,
+        "preco_embalagem": 3.9,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/rolo_para_pintura_de_espuma/000001.jpg",
+          "/imagens/rolo_para_pintura_de_espuma/000002.jpg"
+        ]
+      },
+      {
+        "id": 39,
+        "nome": "Rolo p/ Pintura de Espuma                         ...",
+        "nome_completo": "Rolo p/ Pintura de Espuma                         09cm",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 5.5,
+        "preco_embalagem": 5.5,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/rolo_para_pintura_de_espuma/000001.jpg",
+          "/imagens/rolo_para_pintura_de_espuma/000002.jpg"
+        ]
+      },
+      {
+        "id": 40,
+        "nome": "Rolo p/ Pintura de Lã Carneiro Ant-Respigo  23cm",
+        "nome_completo": "Rolo p/ Pintura de Lã Carneiro Ant-Respigo  23cm",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 21,
+        "preco_embalagem": 21,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/rolo_para_pintura_de_lã_carneiro/000001.jpg",
+          "/imagens/rolo_para_pintura_de_lã_carneiro/000002.jpg"
+        ]
+      },
+      {
+        "id": 41,
+        "nome": "Tacha Azulada ''Tachinha''  Nº 08     10X100",
+        "nome_completo": "Tacha Azulada ''Tachinha''  Nº 08     10X100",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 3.95,
+        "preco_embalagem": 39.5,
+        "unidade": "Cx.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/tachinha_azulada/000001.jpg",
+          "/imagens/tachinha_azulada/000002.jpg"
+        ]
+      },
+      {
+        "id": 42,
+        "nome": "Torneira de Tanque Curta          1/2",
+        "nome_completo": "Torneira de Tanque Curta          1/2",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 4.75,
+        "preco_embalagem": 4.75,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/torneira_de_tanque_curta/000001.jpg",
+          "/imagens/torneira_de_tanque_curta/000002.jpg"
+        ]
+      },
+      {
+        "id": 43,
+        "nome": "Torneira de Tanque Curta          3/4",
+        "nome_completo": "Torneira de Tanque Curta          3/4",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 4.75,
+        "preco_embalagem": 4.75,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/torneira_de_tanque_curta/000001.jpg",
+          "/imagens/torneira_de_tanque_curta/000002.jpg"
+        ]
+      },
+      {
+        "id": 44,
+        "nome": "Trincha Pincel  Condor / Roma         ³/4\"",
+        "nome_completo": "Trincha Pincel  Condor / Roma         ³/4\"",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 3.65,
+        "preco_embalagem": 3.65,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/trincha_pincel_condor_roma/000001.jpg",
+          "/imagens/trincha_pincel_condor_roma/000002.jpg"
+        ]
+      },
+      {
+        "id": 45,
+        "nome": "Trincha Pincel  Condor / Roma          2\"",
+        "nome_completo": "Trincha Pincel  Condor / Roma          2\"",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 7.3,
+        "preco_embalagem": 7.3,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/trincha_pincel_condor_roma/000001.jpg",
+          "/imagens/trincha_pincel_condor_roma/000002.jpg"
+        ]
+      },
+      {
+        "id": 46,
+        "nome": "Trincha Pincel  Condor / Roma       2.¹/2\"",
+        "nome_completo": "Trincha Pincel  Condor / Roma       2.¹/2\"",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 8.7,
+        "preco_embalagem": 8.7,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/trincha_pincel_condor_roma/000001.jpg",
+          "/imagens/trincha_pincel_condor_roma/000002.jpg"
+        ]
+      },
+      {
+        "id": 47,
+        "nome": "Trincha Pincel  Condor / Roma          3\"",
+        "nome_completo": "Trincha Pincel  Condor / Roma          3\"",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 9.99,
+        "preco_embalagem": 9.99,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/trincha_pincel_condor_roma/000001.jpg",
+          "/imagens/trincha_pincel_condor_roma/000002.jpg"
+        ]
+      },
+      {
+        "id": 48,
+        "nome": "Serra A/C Thompson \" p/ Segueta\"             10x1",
+        "nome_completo": "Serra A/C Thompson \" p/ Segueta\"             10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 4.8,
+        "preco_embalagem": 48,
+        "unidade": "Pct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/serra_thompson_para_segueta/000001.jpg",
+          "/imagens/serra_thompson_para_segueta/000002.jpg"
+        ]
+      },
+      {
+        "id": 49,
+        "nome": "Sifão Universal",
+        "nome_completo": "Sifão Universal",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 6.95,
+        "preco_embalagem": 6.95,
+        "unidade": "Unid.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/sifão_universal/000001.jpg",
+          "/imagens/sifão_universal/000002.jpg"
+        ]
+      },
+      {
+        "id": 50,
+        "nome": "Veda Rosca  18mmx5mts  Multifita             10x1",
+        "nome_completo": "Veda Rosca  18mmx5mts  Multifita             10x1",
+        "categoria": "Outros Produtos",
+        "preco_unitario": 2.35,
+        "preco_embalagem": 23.5,
+        "unidade": "Ct.",
+        "icon": "Package",
+        "imagens": [
+          "/imagens/veda_rosca_mm_x_m/000001.jpg",
+          "/imagens/veda_rosca_mm_x_m/000002.jpg"
+        ]
+      }
+    ]
+  }
+}
