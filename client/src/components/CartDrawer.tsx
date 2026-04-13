@@ -135,7 +135,7 @@ export default function CartDrawer({ cart, open, onOpenChange, whatsappNumber, c
                         <div className="flex items-center justify-between mt-1.5">
                           <div className="flex items-center gap-1">
                             <button
-                              onClick={() => cart.updateQuantity(item.categoria, item.id, item.quantidade - 1)}
+                              onClick={() => cart.updateQuantity(item.categoria, item.id, item.quantidade - item.passo)}
                               className="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors"
                             >
                               <Minus size={12} />
@@ -144,7 +144,7 @@ export default function CartDrawer({ cart, open, onOpenChange, whatsappNumber, c
                               {item.quantidade}
                             </span>
                             <button
-                              onClick={() => cart.updateQuantity(item.categoria, item.id, item.quantidade + 1)}
+                              onClick={() => cart.updateQuantity(item.categoria, item.id, item.quantidade + item.passo)}
                               className="w-7 h-7 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                             >
                               <Plus size={12} />

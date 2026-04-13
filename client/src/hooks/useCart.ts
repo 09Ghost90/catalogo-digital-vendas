@@ -20,7 +20,38 @@ export interface CartItem {
   unidade: string;
   imagens?: string[];
   quantidade: number;
+  passo: number;
   tipo: 'unitario' | 'embalagem';
+}
+
+function getProductStep(product: any): number {
+  const uni = String(product.unidade || '').toLowerCase().trim();
+  
+  if (['un.', 'un', 'unid', 'unid.', 'unidade', 'unidades', 'peça', 'pc', 'pcs', 'pç', 'pçs', 'metro', 'm', 'kg'].includes(uni)) return 1;
+  if (['dz.', 'dz', 'duzia', 'dúzia'].includes(uni)) return 12;
+  if (['ct.', 'ct', 'cartela'].includes(uni)) return 10;
+  
+  // Try regex on name
+  const matchX1 = product.nome.match(/(?:cd\.?\s*)?(\d+)\s*x\s*1/i);
+  if (matchX1) return parseInt(matchX1[1], 10);
+  
+  const matchUn = product.nome.match(/(\d+)\s*u(?:nid|nidades?)?\b/i);
+  if (matchUn) return parseInt(matchUn[1], 10);
+  
+  const matchPecas = product.nome.match(/(\d+)\s*peças?\b/i);
+  if (matchPecas) return parseInt(matchPecas[1], 10);
+
+  // Try math heuristic
+  if (product.preco_unitario > 0 && product.preco_embalagem > 0) {
+    const calc = product.preco_embalagem / product.preco_unitario;
+    if (Math.abs(calc - Math.round(calc)) < 0.05) {
+        const rounded = Math.round(calc);
+        if (rounded >= 2 && rounded <= 1000) return rounded;
+    }
+  }
+
+  // User requested default
+  return 10;
 }
 
 export interface CustomerCheckoutData {
@@ -47,6 +78,8 @@ export function useCart(whatsappNumber: string): CartActions {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('');
 
   const addToCart = useCallback((product: any) => {
+    const passo = getProductStep(product);
+    
     setItems(prev => {
       const existing = prev.find(
         item => item.id === product.id && item.categoria === product.categoria
@@ -54,7 +87,7 @@ export function useCart(whatsappNumber: string): CartActions {
       if (existing) {
         return prev.map(item =>
           item.id === product.id && item.categoria === product.categoria
-            ? { ...item, quantidade: item.quantidade + 1 }
+            ? { ...item, quantidade: item.quantidade + item.passo }
             : item
         );
       }
@@ -67,7 +100,8 @@ export function useCart(whatsappNumber: string): CartActions {
         preco_embalagem: product.preco_embalagem,
         unidade: product.unidade,
         imagens: product.imagens,
-        quantidade: 1,
+        quantidade: passo,
+        passo: passo,
         tipo: 'unitario' as const,
       }];
     });

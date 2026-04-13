@@ -432,7 +432,7 @@ export default function Home() {
                       className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-slate-800 dark:to-slate-700/50 border-b border-blue-100 dark:border-slate-800 flex items-center justify-between hover:from-blue-100 hover:to-green-100 dark:hover:from-slate-700 dark:hover:to-slate-600 transition-all"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-[4.2rem] h-[4.2rem] sm:w-[4.8rem] sm:h-[4.8rem] rounded-full overflow-hidden border-2 border-white dark:border-slate-600 shadow-sm flex-shrink-0">
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-white dark:border-slate-600 shadow-sm flex-shrink-0">
                           <img
                             src={data.categoryImages[category]}
                             alt={category}
