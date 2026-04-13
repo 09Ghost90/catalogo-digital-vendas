@@ -28,7 +28,15 @@ interface CatalogData {
   categorias: Record<string, Produto[]>;
 }
 
-const data: CatalogData = catalogData;
+function loadCatalog(): CatalogData {
+  try {
+    const saved = localStorage.getItem('admin_products_override');
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return catalogData as CatalogData;
+}
+
+const data: CatalogData = loadCatalog();
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,11 +115,20 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-sm border-b border-blue-100 dark:border-slate-800 transition-colors duration-300">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent truncate">
-                {data.empresa}
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Catálogo Digital de Produtos</p>
+            <div className="flex items-center gap-2 min-w-0">
+              <a
+                href="/"
+                className="p-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+                title="Voltar ao início"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 dark:text-blue-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </a>
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent truncate">
+                  {data.empresa}
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Catálogo Digital de Produtos</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {/* Cart Button */}
@@ -313,7 +330,7 @@ export default function Home() {
                       className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-slate-800 dark:to-slate-700/50 border-b border-blue-100 dark:border-slate-800 flex items-center justify-between hover:from-blue-100 hover:to-green-100 dark:hover:from-slate-700 dark:hover:to-slate-600 transition-all"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-600 shadow-sm flex-shrink-0">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white dark:border-slate-600 shadow-sm flex-shrink-0">
                           <img
                             src={data.categoryImages[category]}
                             alt={category}
