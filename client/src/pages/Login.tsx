@@ -125,12 +125,7 @@ export default function Login() {
             </Button>
           </form>
 
-          {/* Credentials hint */}
-          <div className="mt-6 p-3 rounded-xl bg-slate-900/50 border border-slate-700/50">
-            <p className="text-xs text-slate-500 text-center">
-              Usuário: <span className="text-slate-400 font-mono">admin</span> • Senha: <span className="text-slate-400 font-mono">Armarinho2025!</span>
-            </p>
-          </div>
+
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-6">
