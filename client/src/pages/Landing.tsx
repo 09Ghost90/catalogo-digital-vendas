@@ -1,5 +1,6 @@
-import { ShoppingBag, Shield, Sparkles } from 'lucide-react';
+import { ShoppingBag, Shield } from 'lucide-react';
 import { useLocation } from 'wouter';
+import Logo from '@/components/Logo';
 
 export default function Landing() {
   const [, navigate] = useLocation();
@@ -9,13 +10,8 @@ export default function Landing() {
       <div className="w-full max-w-lg">
         {/* Logo / Brand */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-green-600 mb-5 shadow-xl shadow-blue-600/20">
-            <Sparkles size={36} className="text-white" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-2">
-            Armarinhos Pereira
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">
+          <Logo variant="stacked" size={80} />
+          <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base mt-3">
             Catálogo Digital de Produtos
           </p>
         </div>

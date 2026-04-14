@@ -3,6 +3,7 @@ import { Eye, EyeOff, Lock, User, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAdmin';
+import Logo from '@/components/Logo';
 
 export default function Login() {
   const { isAuthenticated, login } = useAuth();
@@ -52,11 +53,8 @@ export default function Login() {
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-8 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 mb-4 shadow-lg shadow-emerald-500/20">
-              <Lock size={28} className="text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-1">Área Administrativa</h1>
-            <p className="text-sm text-slate-400">Faça login para gerenciar o catálogo</p>
+            <Logo variant="stacked" size={64} dark />
+            <p className="text-sm text-slate-400 mt-3">Faça login para gerenciar o catálogo</p>
           </div>
 
           {/* Error */}

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import CartDrawer from '@/components/CartDrawer';
+import Logo from '@/components/Logo';
 import { useCart } from '@/hooks/useCart';
 import { useCustomer } from '@/hooks/useCustomer';
 import type { CustomerProfile } from '@/hooks/useCustomer';
@@ -191,17 +192,10 @@ export default function Home() {
             <div className="flex items-center gap-2 min-w-0">
               <a
                 href="/"
-                className="p-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
                 title="Voltar ao início"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 dark:text-blue-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <Logo variant="horizontal" size={40} />
               </a>
-              <div className="min-w-0">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent truncate">
-                  {data.empresa}
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Catálogo Digital de Produtos</p>
-              </div>
             </div>
             <div className="flex items-center gap-2">
               {/* Cart Button */}
