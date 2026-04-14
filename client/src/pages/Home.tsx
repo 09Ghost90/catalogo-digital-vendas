@@ -9,39 +9,12 @@ import Logo from '@/components/Logo';
 import { useCart } from '@/hooks/useCart';
 import { useCustomer } from '@/hooks/useCustomer';
 import type { CustomerProfile } from '@/hooks/useCustomer';
+import { useCatalog } from '@/hooks/useCatalog';
+import type { Produto } from '@/hooks/useCatalog';
 import { toast } from 'sonner';
-import catalogData from '../../../produtos.json';
-
-interface Produto {
-  id: number;
-  nome: string;
-  nome_completo: string;
-  categoria: string;
-  preco_unitario: number;
-  preco_embalagem: number;
-  unidade: string;
-  icon: string;
-  imagens?: string[];
-}
-
-interface CatalogData {
-  empresa: string;
-  whatsapp: string;
-  categoryImages: Record<string, string>;
-  categorias: Record<string, Produto[]>;
-}
-
-function loadCatalog(): CatalogData {
-  try {
-    const saved = localStorage.getItem('admin_products_override');
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  return catalogData as CatalogData;
-}
-
-const data: CatalogData = loadCatalog();
 
 export default function Home() {
+  const { data, loading: catalogLoading, error: catalogError } = useCatalog();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'nome' | 'preco'>('nome');
@@ -49,13 +22,14 @@ export default function Home() {
   const [cartOpen, setCartOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const cart = useCart(data.whatsapp);
+  const cart = useCart(data?.whatsapp || '');
   const customer = useCustomer();
-  const allCategories = Object.keys(data.categorias).sort();
+  const allCategories = Object.keys(data?.categorias || {}).sort();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [profileForm, setProfileForm] = useState<CustomerProfile>(customer.profile);
 
   const filteredProducts = useMemo(() => {
+    if (!data) return [];
     let products: Produto[] = [];
     const categoriesToShow =
       selectedCategories.length === 0 ? allCategories : selectedCategories;
@@ -79,7 +53,7 @@ export default function Home() {
     }
 
     return products;
-  }, [searchTerm, selectedCategories, sortBy]);
+  }, [data, searchTerm, selectedCategories, sortBy, allCategories]);
 
   const groupedByCategory = useMemo(() => {
     const grouped: Record<string, Produto[]> = {};
@@ -99,6 +73,31 @@ export default function Home() {
         : [...prev, category]
     );
   };
+
+  // Loading state — AFTER all hooks
+  if (catalogLoading || !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Carregando catálogo...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (catalogError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
+        <div className="text-center max-w-md">
+          <Package size={48} className="text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Erro ao carregar</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">{catalogError}</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddToCart = (product: Produto) => {
     cart.addToCart(product);

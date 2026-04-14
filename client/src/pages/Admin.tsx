@@ -6,20 +6,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth, useProductManager } from '@/hooks/useAdmin';
+import { useCatalog } from '@/hooks/useCatalog';
+import type { Produto } from '@/hooks/useCatalog';
 import { toast } from 'sonner';
-import catalogData from '../../../produtos.json';
-
-interface Produto {
-  id: number;
-  nome: string;
-  nome_completo: string;
-  categoria: string;
-  preco_unitario: number;
-  preco_embalagem: number;
-  unidade: string;
-  icon: string;
-  imagens?: string[];
-}
 
 // Utility for client-side image compression
 async function compressImage(file: File, maxWidth = 600, maxHeight = 600): Promise<string> {
@@ -48,7 +37,7 @@ async function compressImage(file: File, maxWidth = 600, maxHeight = 600): Promi
         const ctx = canvas.getContext('2d');
         if (!ctx) return reject('No context');
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7)); // 70% quality JPEG
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
       img.onerror = (e) => reject(e);
     };
@@ -58,13 +47,8 @@ async function compressImage(file: File, maxWidth = 600, maxHeight = 600): Promi
 
 export default function Admin() {
   const { isAuthenticated, logout } = useAuth();
-  const pm = useProductManager(catalogData as any);
-
-  // Synchronous auth guard — redirect immediately if not authenticated
-  if (!isAuthenticated) {
-    window.location.href = '/login';
-    return null;
-  }
+  const pm = useProductManager();
+  const { data: catalog, loading: catalogLoading, refetch } = useCatalog();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -72,7 +56,6 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<Produto | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ categoria: string; id: number } | null>(null);
 
-  // New product form state
   const [formData, setFormData] = useState({
     nome: '',
     nome_completo: '',
@@ -86,7 +69,8 @@ export default function Admin() {
   });
 
   const allProducts = useMemo(() => {
-    let products = pm.getAllProducts();
+    if (!catalog) return [];
+    let products = Object.values(catalog.categorias).flat();
 
     if (filterCategory) {
       products = products.filter(p => p.categoria === filterCategory);
@@ -102,9 +86,27 @@ export default function Admin() {
     }
 
     return products.sort((a, b) => a.nome.localeCompare(b.nome));
-  }, [pm, searchTerm, filterCategory]);
+  }, [catalog, searchTerm, filterCategory]);
 
-  const categories = pm.getCategories();
+  const categories = Object.keys(catalog?.categorias || {}).sort();
+
+  // Auth guard — AFTER all hooks
+  if (!isAuthenticated) {
+    window.location.href = '/login';
+    return null;
+  }
+
+  // Loading guard — AFTER all hooks
+  if (catalogLoading || !catalog) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-400 text-sm">Carregando painel...</p>
+        </div>
+      </div>
+    );
+  }
 
   const resetForm = () => {
     setFormData({
@@ -129,7 +131,7 @@ export default function Admin() {
       const bases = await Promise.all(files.map(f => compressImage(f)));
       setFormData(prev => ({
         ...prev,
-        imagens: [...prev.imagens, ...bases].slice(0, 5) // max 5 images
+        imagens: [...prev.imagens, ...bases].slice(0, 5)
       }));
       toast.success('Imagens anexadas!', { id: 'img-upload' });
     } catch (err) {
@@ -141,14 +143,14 @@ export default function Admin() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const base64 = await compressImage(file, 400, 400); // smaller for categories
+      const base64 = await compressImage(file, 400, 400);
       setFormData(prev => ({ ...prev, newCategoryImage: base64 }));
     } catch {
       toast.error('Erro ao processar imagem da categoria');
     }
   };
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const categoria = formData.novaCategoria || formData.categoria;
     if (!categoria) {
@@ -156,7 +158,8 @@ export default function Admin() {
       return;
     }
 
-    pm.addProduct({
+    toast.loading('Salvando produto...', { id: 'save-product' });
+    const result = await pm.addProduct({
       nome: formData.nome.length > 50 ? formData.nome.substring(0, 50) + '...' : formData.nome,
       nome_completo: formData.nome_completo || formData.nome,
       categoria,
@@ -167,34 +170,51 @@ export default function Admin() {
       icon: 'Package',
     }, formData.newCategoryImage);
 
-    toast.success('Produto cadastrado com sucesso!');
-    resetForm();
-    setShowAddForm(false);
+    if (result) {
+      toast.success('Produto cadastrado com sucesso!', { id: 'save-product' });
+      resetForm();
+      setShowAddForm(false);
+      refetch();
+    } else {
+      toast.error('Erro ao cadastrar produto', { id: 'save-product' });
+    }
   };
 
-  const handleEdit = (e: React.FormEvent) => {
+  const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
 
-    pm.updateProduct(editingProduct.categoria, editingProduct.id, {
+    toast.loading('Atualizando...', { id: 'edit-product' });
+    const success = await pm.updateProduct(editingProduct.id, {
       nome: formData.nome.length > 50 ? formData.nome.substring(0, 50) + '...' : formData.nome,
       nome_completo: formData.nome_completo || formData.nome,
       preco_unitario: parseFloat(formData.preco_unitario) || 0,
       preco_embalagem: parseFloat(formData.preco_embalagem) || 0,
       unidade: formData.unidade,
       imagens: formData.imagens,
-      categoria: formData.novaCategoria || formData.categoria // allow category change if requested implicitly
+      categoria: formData.novaCategoria || formData.categoria
     }, formData.newCategoryImage);
 
-    toast.success('Produto atualizado!');
-    setEditingProduct(null);
-    resetForm();
+    if (success) {
+      toast.success('Produto atualizado!', { id: 'edit-product' });
+      setEditingProduct(null);
+      resetForm();
+      refetch();
+    } else {
+      toast.error('Erro ao atualizar produto', { id: 'edit-product' });
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteConfirm) return;
-    pm.removeProduct(deleteConfirm.categoria, deleteConfirm.id);
-    toast.success('Produto removido');
+    toast.loading('Removendo...', { id: 'delete-product' });
+    const success = await pm.removeProduct(deleteConfirm.id);
+    if (success) {
+      toast.success('Produto removido', { id: 'delete-product' });
+      refetch();
+    } else {
+      toast.error('Erro ao remover produto', { id: 'delete-product' });
+    }
     setDeleteConfirm(null);
   };
 
@@ -205,402 +225,228 @@ export default function Admin() {
       nome_completo: product.nome_completo,
       categoria: product.categoria,
       novaCategoria: '',
-      preco_unitario: product.preco_unitario.toString(),
-      preco_embalagem: product.preco_embalagem.toString(),
+      preco_unitario: String(product.preco_unitario),
+      preco_embalagem: String(product.preco_embalagem),
       unidade: product.unidade,
       imagens: product.imagens || [],
       newCategoryImage: '',
     });
-    setShowAddForm(false);
   };
 
-  const handleLogout = () => {
-    logout();
-    window.location.href = '/';
-  };
-
+  // === RENDER ===
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-sm border-b border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <a
-                href="/"
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <ArrowLeft size={20} className="text-slate-600 dark:text-slate-400" />
-              </a>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  <Package size={20} className="text-emerald-600" />
-                  Painel Administrativo
-                </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {allProducts.length} produtos • {categories.length} categorias
-                </p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-slate-900 text-white">
+      {/* Top Bar */}
+      <div className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <a href="/" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+              <ArrowLeft size={14} />
+            </a>
+            <h1 className="text-lg font-bold text-white">Painel Administrativo</h1>
+            <span className="text-xs text-slate-500 hidden sm:inline">
+              {allProducts.length} produto{allProducts.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
             <Button
-              onClick={handleLogout}
-              variant="outline"
-              size="sm"
-              className="text-red-500 border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl"
+              onClick={() => { setShowAddForm(true); resetForm(); }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm h-9 px-3 rounded-xl"
             >
-              <LogOut size={14} className="mr-1.5" />
-              <span className="hidden sm:inline">Sair</span>
+              <Plus size={16} className="mr-1" /> Novo
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => { logout(); window.location.href = '/'; }}
+              className="text-slate-400 hover:text-red-400 h-9 px-2"
+            >
+              <LogOut size={16} />
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-5xl">
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Search + Filter */}
+        <div className="flex gap-3 mb-6">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3 top-2.5 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-500" />
             <Input
-              type="text"
-              placeholder="Buscar produtos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 rounded-xl h-10 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              placeholder="Buscar produtos..."
+              className="pl-9 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 h-9 rounded-xl"
             />
           </div>
-          <div className="flex gap-2">
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-3 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm min-w-[140px]"
-            >
-              <option value="">Todas categorias</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-            <Button
-              onClick={() => { setShowAddForm(true); setEditingProduct(null); resetForm(); }}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 px-4 flex items-center gap-1.5 shadow-sm"
-            >
-              <Plus size={16} />
-              <span className="hidden sm:inline">Novo Produto</span>
-              <span className="sm:hidden">Novo</span>
-            </Button>
-          </div>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-3 h-9"
+          >
+            <option value="">Todas categorias</option>
+            {categories.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Add/Edit Form Modal */}
-        {(showAddForm || editingProduct) && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { setShowAddForm(false); setEditingProduct(null); }} />
-            <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-in zoom-in-95 duration-200">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  {editingProduct ? <Edit3 size={18} className="text-blue-600" /> : <Plus size={18} className="text-emerald-600" />}
-                  {editingProduct ? 'Editar Produto' : 'Novo Produto'}
-                </h2>
-                <button
-                  onClick={() => { setShowAddForm(false); setEditingProduct(null); }}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <X size={18} className="text-slate-500" />
-                </button>
-              </div>
-
-              <form onSubmit={editingProduct ? handleEdit : handleAdd} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nome do produto *</label>
-                  <Input
-                    value={formData.nome}
-                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                    placeholder="Ex: Agulha de costura"
-                    className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nome completo</label>
-                  <Input
-                    value={formData.nome_completo}
-                    onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
-                    placeholder="Nome completo do produto"
-                    className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
-                  />
-                </div>
-
-                {!editingProduct && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Categoria *</label>
-                    <select
-                      value={formData.categoria}
-                      onChange={(e) => setFormData({ ...formData, categoria: e.target.value, novaCategoria: '' })}
-                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm"
-                    >
-                      <option value="">Selecione uma categoria</option>
-                      {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                    <div className="mt-2 p-3 border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-xl space-y-3">
-                      <Input
-                        value={formData.novaCategoria}
-                        onChange={(e) => setFormData({ ...formData, novaCategoria: e.target.value, categoria: '' })}
-                        placeholder="Ou crie uma nova categoria..."
-                        className="rounded-lg text-sm bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
-                      />
-                      
-                      {formData.novaCategoria && (
-                        <div className="flex items-start gap-3">
-                          {formData.newCategoryImage ? (
-                            <div className="relative w-12 h-12 rounded-full overflow-hidden border border-slate-300 flex-shrink-0">
-                               <img src={formData.newCategoryImage} alt="Cate" className="w-full h-full object-cover" />
-                               <button 
-                                 type="button" 
-                                 onClick={() => setFormData({...formData, newCategoryImage: ''})}
-                                 className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-                               >
-                                 <X size={16} className="text-white" />
-                               </button>
-                            </div>
-                          ) : (
-                            <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 border border-slate-300 dark:border-slate-600">
-                              <ImageIcon size={18} className="text-slate-400" />
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <label className="cursor-pointer inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
-                              <Upload size={14} />
-                              {formData.newCategoryImage ? 'Trocar foto da categoria' : 'Adicionar foto da categoria *'}
-                              <input 
-                                type="file" 
-                                accept="image/*" 
-                                onChange={handleCategoryImageUpload} 
-                                className="hidden" 
-                              />
-                            </label>
-                            <p className="text-[10px] text-slate-500 mt-1">Essa foto aparecerá no catálogo principal.</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+        {/* Products Grid */}
+        <div className="grid gap-3">
+          {allProducts.map(product => (
+            <div key={product.id} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center justify-between group hover:border-slate-600 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                {product.imagens && product.imagens.length > 0 ? (
+                  <img src={product.imagens[0]} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center flex-shrink-0">
+                    <Package size={16} className="text-slate-400" />
                   </div>
                 )}
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Preço Unitário (R$) *</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.preco_unitario}
-                      onChange={(e) => setFormData({ ...formData, preco_unitario: e.target.value })}
-                      placeholder="0.00"
-                      className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Preço Embalagem (R$)</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.preco_embalagem}
-                      onChange={(e) => setFormData({ ...formData, preco_embalagem: e.target.value })}
-                      placeholder="0.00"
-                      className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Unidade</label>
-                  <select
-                    value={formData.unidade}
-                    onChange={(e) => setFormData({ ...formData, unidade: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm"
-                  >
-                    <option value="Un.">Un. (Unidade)</option>
-                    <option value="Pct.">Pct. (Pacote)</option>
-                    <option value="Dz.">Dz. (Dúzia)</option>
-                    <option value="Cx.">Cx. (Caixa)</option>
-                    <option value="Mt.">Mt. (Metro)</option>
-                    <option value="Kg.">Kg. (Quilograma)</option>
-                    <option value="Par">Par</option>
-                    <option value="Rolo">Rolo</option>
-                    <option value="Ct.">Ct. (Cartela)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-                    <span>Fotos do Produto ({formData.imagens.length}/5)</span>
-                    <label className="cursor-pointer flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg hover:bg-blue-100 transition-colors">
-                      <Plus size={12} />
-                      Adicionar fotos
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        multiple 
-                        onChange={handleProductImageUpload} 
-                        className="hidden" 
-                      />
-                    </label>
-                  </label>
-                  {formData.imagens.length > 0 ? (
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                      {formData.imagens.map((img, idx) => (
-                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 dark:border-slate-700">
-                          <img src={img} alt={`Prod-${idx}`} className="w-full h-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => setFormData(p => ({ ...p, imagens: p.imagens.filter((_, i) => i !== idx) }))}
-                            className="absolute top-0 right-0 bg-red-500/80 text-white p-0.5 rounded-bl-lg hover:bg-red-600"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 flex flex-col items-center justify-center text-slate-500">
-                      <ImageIcon size={24} className="mb-2 opacity-50" />
-                      <p className="text-xs">Nenhuma foto anexada</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => { setShowAddForm(false); setEditingProduct(null); }}
-                    className="flex-1 rounded-xl"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    className={`flex-1 rounded-xl text-white shadow-sm ${editingProduct ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
-                  >
-                    <Save size={16} className="mr-1.5" />
-                    {editingProduct ? 'Salvar Alterações' : 'Cadastrar Produto'}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {deleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
-            <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border p-6 max-w-sm w-full animate-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                  <AlertTriangle size={24} className="text-red-500" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-800 dark:text-white">Confirmar exclusão</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Esta ação não pode ser desfeita</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-white truncate">{product.nome_completo || product.nome}</p>
+                  <p className="text-xs text-slate-400">{product.categoria} · {product.unidade} · R$ {product.preco_unitario.toFixed(2)}</p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setDeleteConfirm(null)} className="flex-1 rounded-xl">
-                  Cancelar
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button size="sm" variant="ghost" onClick={() => startEdit(product)} className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400">
+                  <Edit3 size={14} />
                 </Button>
-                <Button onClick={handleDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl">
-                  <Trash2 size={14} className="mr-1.5" />
-                  Excluir
+                <Button size="sm" variant="ghost" onClick={() => setDeleteConfirm({ categoria: product.categoria, id: product.id })} className="h-8 w-8 p-0 text-slate-400 hover:text-red-400">
+                  <Trash2 size={14} />
                 </Button>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Products Table */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-          {allProducts.length === 0 ? (
-            <div className="text-center py-16">
-              <Package size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-              <p className="text-slate-500 dark:text-slate-400">Nenhum produto encontrado</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-slate-300">Produto</th>
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600 dark:text-slate-300 hidden sm:table-cell">Categoria</th>
-                    <th className="text-right px-4 py-3 font-semibold text-slate-600 dark:text-slate-300">Unit.</th>
-                    <th className="text-right px-4 py-3 font-semibold text-slate-600 dark:text-slate-300 hidden sm:table-cell">Emb.</th>
-                    <th className="text-center px-4 py-3 font-semibold text-slate-600 dark:text-slate-300 w-24">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allProducts.map((product) => (
-                    <tr
-                      key={`${product.categoria}-${product.id}`}
-                      className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 dark:from-slate-800 dark:to-slate-700 flex-shrink-0 flex items-center justify-center">
-                            {product.imagens && product.imagens.length > 0 ? (
-                              <img src={product.imagens[0]} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <Package size={14} className="text-slate-400" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-800 dark:text-white truncate max-w-[200px] sm:max-w-[300px]">
-                              {product.nome}
-                            </p>
-                            <p className="text-xs text-slate-400 sm:hidden">{product.categoria}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded-lg font-medium">
-                          {product.categoria}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right font-semibold text-emerald-600">
-                        R$ {product.preco_unitario.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 hidden sm:table-cell">
-                        R$ {product.preco_embalagem.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => startEdit(product)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                            title="Editar"
-                          >
-                            <Edit3 size={14} />
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm({ categoria: product.categoria, id: product.id })}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                            title="Excluir"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          ))}
+          {allProducts.length === 0 && (
+            <div className="text-center py-12 text-slate-500">
+              <Package size={40} className="mx-auto mb-3 opacity-30" />
+              <p>Nenhum produto encontrado</p>
             </div>
           )}
         </div>
-      </main>
+      </div>
+
+      {/* Add / Edit Modal */}
+      {(showAddForm || editingProduct) && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-white">
+                {editingProduct ? 'Editar Produto' : 'Novo Produto'}
+              </h2>
+              <Button variant="ghost" size="sm" onClick={() => { setShowAddForm(false); setEditingProduct(null); resetForm(); }} className="text-slate-400 h-8 w-8 p-0">
+                <X size={18} />
+              </Button>
+            </div>
+            <form onSubmit={editingProduct ? handleEdit : handleAdd} className="space-y-4">
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">Nome do Produto *</label>
+                <Input value={formData.nome} onChange={e => setFormData(p => ({ ...p, nome: e.target.value }))} required className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl" />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">Nome Completo</label>
+                <Input value={formData.nome_completo} onChange={e => setFormData(p => ({ ...p, nome_completo: e.target.value }))} className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Categoria *</label>
+                  <select value={formData.categoria} onChange={e => setFormData(p => ({ ...p, categoria: e.target.value }))} className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 h-9">
+                    <option value="">Selecionar...</option>
+                    {categories.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Ou criar nova</label>
+                  <Input value={formData.novaCategoria} onChange={e => setFormData(p => ({ ...p, novaCategoria: e.target.value }))} placeholder="Nova categoria..." className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl" />
+                </div>
+              </div>
+              {formData.novaCategoria && (
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Foto da Categoria</label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-blue-400 hover:text-blue-300">
+                    <Upload size={14} /> Anexar imagem da categoria
+                    <input type="file" accept="image/*" className="hidden" onChange={handleCategoryImageUpload} />
+                  </label>
+                  {formData.newCategoryImage && (
+                    <img src={formData.newCategoryImage} alt="Preview" className="w-16 h-16 rounded-lg mt-2 object-cover" />
+                  )}
+                </div>
+              )}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Preço Unit. *</label>
+                  <Input type="number" step="0.01" value={formData.preco_unitario} onChange={e => setFormData(p => ({ ...p, preco_unitario: e.target.value }))} required className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl" />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Preço Emb.</label>
+                  <Input type="number" step="0.01" value={formData.preco_embalagem} onChange={e => setFormData(p => ({ ...p, preco_embalagem: e.target.value }))} className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl" />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Unidade</label>
+                  <select value={formData.unidade} onChange={e => setFormData(p => ({ ...p, unidade: e.target.value }))} className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 h-9">
+                    <option value="Un.">Un.</option>
+                    <option value="Dz.">Dz. (12)</option>
+                    <option value="Ct.">Ct. (10)</option>
+                    <option value="Cx.">Cx. (10)</option>
+                    <option value="Pct.">Pct.</option>
+                    <option value="Mt.">Mt.</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">Fotos do Produto (até 5)</label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-emerald-400 hover:text-emerald-300">
+                  <ImageIcon size={14} /> Adicionar fotos
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleProductImageUpload} />
+                </label>
+                {formData.imagens.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {formData.imagens.map((img, i) => (
+                      <div key={i} className="relative">
+                        <img src={img} alt="" className="w-14 h-14 rounded-lg object-cover" />
+                        <button type="button" onClick={() => setFormData(p => ({ ...p, imagens: p.imagens.filter((_, j) => j !== i) }))} className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Button type="submit" disabled={pm.loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-10 rounded-xl font-semibold">
+                {pm.loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Salvando...
+                  </div>
+                ) : (
+                  <>{editingProduct ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />} {editingProduct ? 'Salvar Alterações' : 'Cadastrar Produto'}</>
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-sm w-full">
+            <div className="text-center">
+              <AlertTriangle size={40} className="text-amber-400 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-white mb-2">Confirmar Exclusão</h3>
+              <p className="text-slate-400 text-sm mb-5">Tem certeza que deseja remover este produto? Essa ação não pode ser desfeita.</p>
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => setDeleteConfirm(null)} className="flex-1 h-10 rounded-xl text-slate-400">
+                  Cancelar
+                </Button>
+                <Button onClick={handleDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white h-10 rounded-xl">
+                  <Trash2 size={14} className="mr-1" /> Remover
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

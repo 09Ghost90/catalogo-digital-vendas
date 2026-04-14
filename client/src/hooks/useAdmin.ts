@@ -1,26 +1,8 @@
 import { useState, useCallback } from 'react';
-
-interface Produto {
-  id: number;
-  nome: string;
-  nome_completo: string;
-  categoria: string;
-  preco_unitario: number;
-  preco_embalagem: number;
-  unidade: string;
-  icon: string;
-  imagens?: string[];
-}
-
-interface CatalogData {
-  empresa: string;
-  whatsapp: string;
-  categoryImages: Record<string, string>;
-  categorias: Record<string, Produto[]>;
-}
+import { supabase } from '@/lib/supabase';
+import type { Produto, CatalogData } from './useCatalog';
 
 const AUTH_KEY = 'admin_auth_token';
-const PRODUCTS_KEY = 'admin_products_override';
 
 // Credentials
 const ADMIN_USER = 'admin';
@@ -48,124 +30,142 @@ export function useAuth() {
   return { isAuthenticated, login, logout };
 }
 
-export function useProductManager(baseCatalog: CatalogData) {
-  const [catalog, setCatalog] = useState<CatalogData>(() => {
-    const saved = localStorage.getItem(PRODUCTS_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return baseCatalog;
-      }
-    }
-    return baseCatalog;
-  });
+/**
+ * Supabase-backed product manager.
+ * All CRUD operations go directly to the cloud database.
+ */
+export function useProductManager() {
+  const [loading, setLoading] = useState(false);
 
-  const saveCatalog = useCallback((newCatalog: CatalogData) => {
-    setCatalog(newCatalog);
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(newCatalog));
+  const addProduct = useCallback(async (
+    product: Omit<Produto, 'id'>,
+    newCategoryImage?: string
+  ): Promise<Produto | null> => {
+    setLoading(true);
+    try {
+      // Insert the product
+      const { data, error } = await supabase
+        .from('products')
+        .insert({
+          nome: product.nome,
+          nome_completo: product.nome_completo,
+          categoria: product.categoria,
+          preco_unitario: product.preco_unitario,
+          preco_embalagem: product.preco_embalagem,
+          unidade: product.unidade,
+          icon: product.icon || 'Package',
+          imagens: product.imagens || [],
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // If there is a new category image, upsert it
+      if (newCategoryImage) {
+        await supabase
+          .from('category_images')
+          .upsert({ categoria: product.categoria, image_url: newCategoryImage });
+      }
+
+      return data as Produto;
+    } catch (err: any) {
+      console.error('Erro ao adicionar produto:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const addProduct = useCallback((product: Omit<Produto, 'id'>, newCategoryImage?: string) => {
-    const newCatalog = { ...catalog };
-    const categoria = product.categoria;
+  const removeProduct = useCallback(async (id: number): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
 
-    if (!newCatalog.categorias[categoria]) {
-      newCatalog.categorias[categoria] = [];
-      if (newCategoryImage) {
-        newCatalog.categoryImages = {
-          ...newCatalog.categoryImages,
-          [categoria]: newCategoryImage
-        };
-      }
+      if (error) throw error;
+      return true;
+    } catch (err: any) {
+      console.error('Erro ao remover produto:', err);
+      return false;
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    // Generate next ID
-    const allProducts = Object.values(newCatalog.categorias).flat();
-    const maxId = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) : 0;
+  const updateProduct = useCallback(async (
+    id: number,
+    updates: Partial<Produto>,
+    newCategoryImage?: string
+  ): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const updatePayload: any = {};
+      if (updates.nome !== undefined) updatePayload.nome = updates.nome;
+      if (updates.nome_completo !== undefined) updatePayload.nome_completo = updates.nome_completo;
+      if (updates.categoria !== undefined) updatePayload.categoria = updates.categoria;
+      if (updates.preco_unitario !== undefined) updatePayload.preco_unitario = updates.preco_unitario;
+      if (updates.preco_embalagem !== undefined) updatePayload.preco_embalagem = updates.preco_embalagem;
+      if (updates.unidade !== undefined) updatePayload.unidade = updates.unidade;
+      if (updates.imagens !== undefined) updatePayload.imagens = updates.imagens;
 
-    const newProduct: Produto = {
-      ...product,
-      id: maxId + 1,
-      icon: 'Package',
-    };
+      const { error } = await supabase
+        .from('products')
+        .update(updatePayload)
+        .eq('id', id);
 
-    newCatalog.categorias[categoria] = [...newCatalog.categorias[categoria], newProduct];
-    saveCatalog(newCatalog);
-    return newProduct;
-  }, [catalog, saveCatalog]);
+      if (error) throw error;
 
-  const removeProduct = useCallback((categoria: string, id: number) => {
-    const newCatalog = { ...catalog };
-    if (newCatalog.categorias[categoria]) {
-      newCatalog.categorias[categoria] = newCatalog.categorias[categoria].filter(p => p.id !== id);
-      if (newCatalog.categorias[categoria].length === 0) {
-        delete newCatalog.categorias[categoria];
+      // If there is a new category image, upsert it
+      if (newCategoryImage && updates.categoria) {
+        await supabase
+          .from('category_images')
+          .upsert({ categoria: updates.categoria, image_url: newCategoryImage });
       }
+
+      return true;
+    } catch (err: any) {
+      console.error('Erro ao atualizar produto:', err);
+      return false;
+    } finally {
+      setLoading(false);
     }
-    saveCatalog(newCatalog);
-  }, [catalog, saveCatalog]);
+  }, []);
 
-  const updateProduct = useCallback((categoria: string, id: number, updates: Partial<Produto>, newCategoryImage?: string) => {
-    let newCatalog = { ...catalog };
-    
-    // Check if category changed
-    if (updates.categoria && updates.categoria !== categoria) {
-      const newCategory = updates.categoria;
-      
-      // Move product to new category
-      const productToMove = newCatalog.categorias[categoria]?.find(p => p.id === id);
-      if (productToMove) {
-        // Remove from old
-        newCatalog.categorias[categoria] = newCatalog.categorias[categoria].filter(p => p.id !== id);
-        if (newCatalog.categorias[categoria].length === 0) {
-          delete newCatalog.categorias[categoria];
-        }
-        
-        // Add to new
-        if (!newCatalog.categorias[newCategory]) {
-          newCatalog.categorias[newCategory] = [];
-          if (newCategoryImage) {
-            newCatalog.categoryImages = {
-              ...newCatalog.categoryImages,
-              [newCategory]: newCategoryImage
-            };
-          }
-        }
-        newCatalog.categorias[newCategory] = [...newCatalog.categorias[newCategory], { ...productToMove, ...updates }];
-      }
-    } else {
-      // Just update in same category
-      if (newCatalog.categorias[categoria]) {
-        newCatalog.categorias[categoria] = newCatalog.categorias[categoria].map(p =>
-          p.id === id ? { ...p, ...updates } : p
-        );
-      }
+  /**
+   * Upload an image file to Supabase Storage and return a public URL.
+   */
+  const uploadImage = useCallback(async (file: File, folder: string = 'products'): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase
+        .storage
+        .from('images')
+        .upload(fileName, file, { contentType: file.type, upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase
+        .storage
+        .from('images')
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
+    } catch (err: any) {
+      console.error('Erro ao fazer upload da imagem:', err);
+      return null;
     }
-    
-    saveCatalog(newCatalog);
-  }, [catalog, saveCatalog]);
-
-  const resetToDefault = useCallback(() => {
-    localStorage.removeItem(PRODUCTS_KEY);
-    setCatalog(baseCatalog);
-  }, [baseCatalog]);
-
-  const getAllProducts = useCallback((): Produto[] => {
-    return Object.values(catalog.categorias).flat();
-  }, [catalog]);
-
-  const getCategories = useCallback((): string[] => {
-    return Object.keys(catalog.categorias).sort();
-  }, [catalog]);
+  }, []);
 
   return {
-    catalog,
+    loading,
     addProduct,
     removeProduct,
     updateProduct,
-    resetToDefault,
-    getAllProducts,
-    getCategories,
+    uploadImage,
   };
 }
