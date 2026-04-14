@@ -63,6 +63,7 @@ async function compressImage(file: File, maxWidth = 600, maxHeight = 600): Promi
 type AdminTab = 'estoque' | 'criar-pedido' | 'pedidos';
 
 interface SellerCartItem {
+  source: 'catalog' | 'manual';
   product: Produto;
   quantity: number;
 }
@@ -90,6 +91,7 @@ export default function Admin() {
 
   const [sellerSearch, setSellerSearch] = useState('');
   const [sellerCart, setSellerCart] = useState<SellerCartItem[]>([]);
+  const [quickProductForm, setQuickProductForm] = useState({ nome: '', valor: '', quantidade: '1' });
   const [customerData, setCustomerData] = useState({ nome: '', telefone: '', endereco: '' });
 
   const [formData, setFormData] = useState({
@@ -320,16 +322,58 @@ export default function Admin() {
 
   const addSellerProduct = (product: Produto) => {
     setSellerCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id && item.product.categoria === product.categoria);
+      const existing = prev.find(
+        (item) =>
+          item.source === 'catalog' &&
+          item.product.id === product.id &&
+          item.product.categoria === product.categoria
+      );
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id && item.product.categoria === product.categoria
+          item.source === 'catalog' && item.product.id === product.id && item.product.categoria === product.categoria
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { source: 'catalog', product, quantity: 1 }];
     });
+  };
+
+  const addManualProduct = () => {
+    const nome = quickProductForm.nome.trim();
+    const valor = Number.parseFloat(quickProductForm.valor);
+    const quantidade = Number.parseInt(quickProductForm.quantidade, 10);
+
+    if (!nome) {
+      toast.error('Informe o nome do produto.');
+      return;
+    }
+
+    if (Number.isNaN(valor) || valor <= 0) {
+      toast.error('Informe um valor válido.');
+      return;
+    }
+
+    if (Number.isNaN(quantidade) || quantidade <= 0) {
+      toast.error('Informe uma quantidade válida.');
+      return;
+    }
+
+    const manualProduct: Produto = {
+      id: -Math.floor(Date.now() + Math.random() * 1000),
+      nome,
+      nome_completo: nome,
+      categoria: 'Item avulso',
+      preco_unitario: valor,
+      preco_embalagem: valor,
+      unidade: 'Un.',
+      icon: 'Package',
+      imagens: [],
+    };
+
+    setSellerCart((prev) => [...prev, { source: 'manual', product: manualProduct, quantity: quantidade }]);
+    setQuickProductForm({ nome: '', valor: '', quantidade: '1' });
+    toast.success('Item adicionado ao carrinho.');
   };
 
   const updateSellerQuantity = (productId: number, categoria: string, quantity: number) => {
@@ -376,6 +420,7 @@ export default function Admin() {
     });
 
     sellerCart.forEach((item) => {
+      if (item.source !== 'catalog') return;
       const current = stock.getStock(item.product.categoria, item.product.id);
       const next = Math.max(0, current - item.quantity);
       stock.setStock(item.product.categoria, item.product.id, next);
@@ -666,12 +711,51 @@ export default function Admin() {
             </div>
 
             <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-4 space-y-4">
+              <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3 space-y-2">
+                <p className="text-sm font-semibold">Adicionar produto rápido</p>
+                <Input
+                  value={quickProductForm.nome}
+                  onChange={(e) => setQuickProductForm((p) => ({ ...p, nome: e.target.value }))}
+                  className="bg-slate-900 border-slate-700 text-white h-9"
+                  placeholder="Nome do produto"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={quickProductForm.valor}
+                    onChange={(e) => setQuickProductForm((p) => ({ ...p, valor: e.target.value }))}
+                    className="bg-slate-900 border-slate-700 text-white h-9"
+                    placeholder="Valor"
+                  />
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={quickProductForm.quantidade}
+                    onChange={(e) => setQuickProductForm((p) => ({ ...p, quantidade: e.target.value }))}
+                    className="bg-slate-900 border-slate-700 text-white h-9"
+                    placeholder="Quantidade"
+                  />
+                </div>
+                <Button
+                  onClick={addManualProduct}
+                  className="w-full h-9 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Adicionar item manual
+                </Button>
+              </div>
+
               <h2 className="font-semibold">Carrinho do Pedido</h2>
               <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                 {sellerCart.length === 0 && <p className="text-sm text-slate-400">Nenhum item adicionado.</p>}
                 {sellerCart.map((item) => (
                   <div key={`${item.product.categoria}-${item.product.id}`} className="border border-slate-700 rounded-lg p-2">
                     <p className="text-sm truncate">{item.product.nome}</p>
+                    {item.source === 'manual' && (
+                      <p className="text-xs text-blue-300">Item manual</p>
+                    )}
                     <div className="mt-1 flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <button
