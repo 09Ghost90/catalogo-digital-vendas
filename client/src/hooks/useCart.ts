@@ -3,11 +3,11 @@ import { useState, useCallback } from 'react';
 export type PaymentMethod = 'pix' | 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'boleto' | '';
 
 export const PAYMENT_OPTIONS: { value: PaymentMethod; label: string; icon: string }[] = [
-  { value: 'pix', label: 'PIX', icon: '📱' },
-  { value: 'dinheiro', label: 'Dinheiro', icon: '💵' },
-  { value: 'cartao_credito', label: 'Cartão de Crédito', icon: '💳' },
-  { value: 'cartao_debito', label: 'Cartão de Débito', icon: '💳' },
-  { value: 'boleto', label: 'Boleto', icon: '📄' },
+  { value: 'pix', label: 'PIX', icon: 'PIX' },
+  { value: 'dinheiro', label: 'Dinheiro', icon: '$' },
+  { value: 'cartao_credito', label: 'Cartão de Crédito', icon: 'CC' },
+  { value: 'cartao_debito', label: 'Cartão de Débito', icon: 'CD' },
+  { value: 'boleto', label: 'Boleto', icon: 'BOL' },
 ];
 
 export interface CartItem {
@@ -144,15 +144,15 @@ export function useCart(whatsappNumber: string): CartActions {
   const getWhatsAppMessage = useCallback((customer: CustomerCheckoutData) => {
     if (items.length === 0) return '';
 
-    let message = `Olá! Gostaria de fazer o seguinte pedido:\n\n`;
+    let message = 'Solicitação de pedido:\n\n';
 
     // Customer info
-    message += `📋 *DADOS DO CLIENTE*\n`;
-    message += `👤 Nome: ${customer.nome}\n`;
-    message += `📞 Contato: ${customer.contato}\n`;
-    message += `📍 Endereço: ${customer.endereco}\n\n`;
+    message += '*DADOS DO CLIENTE*\n';
+    message += `Nome: ${customer.nome}\n`;
+    message += `Contato: ${customer.contato}\n`;
+    message += `Endereço: ${customer.endereco}\n\n`;
 
-    message += `🛒 *ITENS DO PEDIDO*\n\n`;
+    message += '*ITENS DO PEDIDO*\n\n';
 
     items.forEach((item, index) => {
       const price = item.tipo === 'embalagem' ? item.preco_embalagem : item.preco_unitario;
@@ -163,17 +163,17 @@ export function useCart(whatsappNumber: string): CartActions {
       message += `   Subtotal: R$ ${(price * item.quantidade).toFixed(2)}\n\n`;
     });
 
-    message += `─────────────────\n`;
+    message += '-----------------\n';
     message += `*TOTAL DO PEDIDO: R$ ${getTotal().toFixed(2)}*\n`;
 
     if (paymentMethod) {
       const selected = PAYMENT_OPTIONS.find(o => o.value === paymentMethod);
       if (selected) {
-        message += `*PAGAMENTO: ${selected.icon} ${selected.label}*\n`;
+        message += `*PAGAMENTO: ${selected.label}*\n`;
       }
     }
 
-    message += `\nAguardo confirmação. Obrigado!`;
+    message += '\nAguardamos confirmação.';
 
     return message;
   }, [items, getTotal, paymentMethod]);

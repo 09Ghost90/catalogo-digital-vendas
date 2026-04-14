@@ -4,18 +4,39 @@ import type { Produto, CatalogData } from './useCatalog';
 
 const AUTH_KEY = 'admin_auth_token';
 
+interface AdminAuthPayload {
+  role: 'admin';
+  authenticatedAt: string;
+}
+
+function readAuthPayload(): AdminAuthPayload | null {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AdminAuthPayload;
+    if (parsed?.role === 'admin') return parsed;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // Credentials
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'Armarinho2025!';
 
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem(AUTH_KEY) === 'authenticated';
+    return !!readAuthPayload();
   });
 
   const login = useCallback((username: string, password: string): boolean => {
     if (username === ADMIN_USER && password === ADMIN_PASS) {
-      localStorage.setItem(AUTH_KEY, 'authenticated');
+      const payload: AdminAuthPayload = {
+        role: 'admin',
+        authenticatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(AUTH_KEY, JSON.stringify(payload));
       setIsAuthenticated(true);
       return true;
     }

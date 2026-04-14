@@ -231,7 +231,7 @@ export default function CartDrawer({ cart, open, onOpenChange, whatsappNumber, c
               {/* Auto-fill notice */}
               {customerProfile && customerProfile.nome && (
                 <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/20 text-green-700 dark:text-green-400 text-xs">
-                  ✅ Dados preenchidos automaticamente a partir do seu perfil
+                  Dados preenchidos automaticamente a partir do perfil do cliente.
                 </div>
               )}
 
