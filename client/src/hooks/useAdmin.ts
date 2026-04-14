@@ -66,12 +66,18 @@ export function useProductManager(baseCatalog: CatalogData) {
     localStorage.setItem(PRODUCTS_KEY, JSON.stringify(newCatalog));
   }, []);
 
-  const addProduct = useCallback((product: Omit<Produto, 'id'>) => {
+  const addProduct = useCallback((product: Omit<Produto, 'id'>, newCategoryImage?: string) => {
     const newCatalog = { ...catalog };
     const categoria = product.categoria;
 
     if (!newCatalog.categorias[categoria]) {
       newCatalog.categorias[categoria] = [];
+      if (newCategoryImage) {
+        newCatalog.categoryImages = {
+          ...newCatalog.categoryImages,
+          [categoria]: newCategoryImage
+        };
+      }
     }
 
     // Generate next ID
@@ -100,13 +106,43 @@ export function useProductManager(baseCatalog: CatalogData) {
     saveCatalog(newCatalog);
   }, [catalog, saveCatalog]);
 
-  const updateProduct = useCallback((categoria: string, id: number, updates: Partial<Produto>) => {
-    const newCatalog = { ...catalog };
-    if (newCatalog.categorias[categoria]) {
-      newCatalog.categorias[categoria] = newCatalog.categorias[categoria].map(p =>
-        p.id === id ? { ...p, ...updates } : p
-      );
+  const updateProduct = useCallback((categoria: string, id: number, updates: Partial<Produto>, newCategoryImage?: string) => {
+    let newCatalog = { ...catalog };
+    
+    // Check if category changed
+    if (updates.categoria && updates.categoria !== categoria) {
+      const newCategory = updates.categoria;
+      
+      // Move product to new category
+      const productToMove = newCatalog.categorias[categoria]?.find(p => p.id === id);
+      if (productToMove) {
+        // Remove from old
+        newCatalog.categorias[categoria] = newCatalog.categorias[categoria].filter(p => p.id !== id);
+        if (newCatalog.categorias[categoria].length === 0) {
+          delete newCatalog.categorias[categoria];
+        }
+        
+        // Add to new
+        if (!newCatalog.categorias[newCategory]) {
+          newCatalog.categorias[newCategory] = [];
+          if (newCategoryImage) {
+            newCatalog.categoryImages = {
+              ...newCatalog.categoryImages,
+              [newCategory]: newCategoryImage
+            };
+          }
+        }
+        newCatalog.categorias[newCategory] = [...newCatalog.categorias[newCategory], { ...productToMove, ...updates }];
+      }
+    } else {
+      // Just update in same category
+      if (newCatalog.categorias[categoria]) {
+        newCatalog.categorias[categoria] = newCatalog.categorias[categoria].map(p =>
+          p.id === id ? { ...p, ...updates } : p
+        );
+      }
     }
+    
     saveCatalog(newCatalog);
   }, [catalog, saveCatalog]);
 

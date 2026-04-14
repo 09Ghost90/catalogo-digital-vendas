@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   Plus, Trash2, Search, LogOut, Package, Edit3, X, Save,
-  ArrowLeft, Filter, AlertTriangle
+  ArrowLeft, Filter, AlertTriangle, Image as ImageIcon, Upload
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,41 @@ interface Produto {
   unidade: string;
   icon: string;
   imagens?: string[];
+}
+
+// Utility for client-side image compression
+async function compressImage(file: File, maxWidth = 600, maxHeight = 600): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject('No context');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7)); // 70% quality JPEG
+      };
+      img.onerror = (e) => reject(e);
+    };
+    reader.onerror = (e) => reject(e);
+  });
 }
 
 export default function Admin() {
@@ -46,6 +81,8 @@ export default function Admin() {
     preco_unitario: '',
     preco_embalagem: '',
     unidade: 'Un.',
+    imagens: [] as string[],
+    newCategoryImage: '',
   });
 
   const allProducts = useMemo(() => {
@@ -78,7 +115,37 @@ export default function Admin() {
       preco_unitario: '',
       preco_embalagem: '',
       unidade: 'Un.',
+      imagens: [],
+      newCategoryImage: '',
     });
+  };
+
+  const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    toast.loading('Comprimindo imagens...', { id: 'img-upload' });
+    try {
+      const bases = await Promise.all(files.map(f => compressImage(f)));
+      setFormData(prev => ({
+        ...prev,
+        imagens: [...prev.imagens, ...bases].slice(0, 5) // max 5 images
+      }));
+      toast.success('Imagens anexadas!', { id: 'img-upload' });
+    } catch (err) {
+      toast.error('Erro ao comprimir imagem', { id: 'img-upload' });
+    }
+  };
+
+  const handleCategoryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const base64 = await compressImage(file, 400, 400); // smaller for categories
+      setFormData(prev => ({ ...prev, newCategoryImage: base64 }));
+    } catch {
+      toast.error('Erro ao processar imagem da categoria');
+    }
   };
 
   const handleAdd = (e: React.FormEvent) => {
@@ -96,8 +163,9 @@ export default function Admin() {
       preco_unitario: parseFloat(formData.preco_unitario) || 0,
       preco_embalagem: parseFloat(formData.preco_embalagem) || 0,
       unidade: formData.unidade,
+      imagens: formData.imagens,
       icon: 'Package',
-    });
+    }, formData.newCategoryImage);
 
     toast.success('Produto cadastrado com sucesso!');
     resetForm();
@@ -114,7 +182,9 @@ export default function Admin() {
       preco_unitario: parseFloat(formData.preco_unitario) || 0,
       preco_embalagem: parseFloat(formData.preco_embalagem) || 0,
       unidade: formData.unidade,
-    });
+      imagens: formData.imagens,
+      categoria: formData.novaCategoria || formData.categoria // allow category change if requested implicitly
+    }, formData.newCategoryImage);
 
     toast.success('Produto atualizado!');
     setEditingProduct(null);
@@ -138,6 +208,8 @@ export default function Admin() {
       preco_unitario: product.preco_unitario.toString(),
       preco_embalagem: product.preco_embalagem.toString(),
       unidade: product.unidade,
+      imagens: product.imagens || [],
+      newCategoryImage: '',
     });
     setShowAddForm(false);
   };
@@ -271,13 +343,47 @@ export default function Admin() {
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
-                    <div className="mt-2">
+                    <div className="mt-2 p-3 border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-xl space-y-3">
                       <Input
                         value={formData.novaCategoria}
                         onChange={(e) => setFormData({ ...formData, novaCategoria: e.target.value, categoria: '' })}
                         placeholder="Ou crie uma nova categoria..."
-                        className="rounded-xl text-sm dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                        className="rounded-lg text-sm bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
                       />
+                      
+                      {formData.novaCategoria && (
+                        <div className="flex items-start gap-3">
+                          {formData.newCategoryImage ? (
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden border border-slate-300 flex-shrink-0">
+                               <img src={formData.newCategoryImage} alt="Cate" className="w-full h-full object-cover" />
+                               <button 
+                                 type="button" 
+                                 onClick={() => setFormData({...formData, newCategoryImage: ''})}
+                                 className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                               >
+                                 <X size={16} className="text-white" />
+                               </button>
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 border border-slate-300 dark:border-slate-600">
+                              <ImageIcon size={18} className="text-slate-400" />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <label className="cursor-pointer inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
+                              <Upload size={14} />
+                              {formData.newCategoryImage ? 'Trocar foto da categoria' : 'Adicionar foto da categoria *'}
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleCategoryImageUpload} 
+                                className="hidden" 
+                              />
+                            </label>
+                            <p className="text-[10px] text-slate-500 mt-1">Essa foto aparecerá no catálogo principal.</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -327,6 +433,44 @@ export default function Admin() {
                     <option value="Rolo">Rolo</option>
                     <option value="Ct.">Ct. (Cartela)</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                    <span>Fotos do Produto ({formData.imagens.length}/5)</span>
+                    <label className="cursor-pointer flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg hover:bg-blue-100 transition-colors">
+                      <Plus size={12} />
+                      Adicionar fotos
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        multiple 
+                        onChange={handleProductImageUpload} 
+                        className="hidden" 
+                      />
+                    </label>
+                  </label>
+                  {formData.imagens.length > 0 ? (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {formData.imagens.map((img, idx) => (
+                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 dark:border-slate-700">
+                          <img src={img} alt={`Prod-${idx}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setFormData(p => ({ ...p, imagens: p.imagens.filter((_, i) => i !== idx) }))}
+                            className="absolute top-0 right-0 bg-red-500/80 text-white p-0.5 rounded-bl-lg hover:bg-red-600"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 flex flex-col items-center justify-center text-slate-500">
+                      <ImageIcon size={24} className="mb-2 opacity-50" />
+                      <p className="text-xs">Nenhuma foto anexada</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2 pt-2">

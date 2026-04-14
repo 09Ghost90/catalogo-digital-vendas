@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal, UserPlus, Edit3 } from 'lucide-react';
+import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal, UserPlus, Edit3, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import WhatsAppButton from '@/components/WhatsAppButton';
@@ -433,11 +433,17 @@ export default function Home() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-white dark:border-slate-600 shadow-sm flex-shrink-0">
-                          <img
-                            src={data.categoryImages[category]}
-                            alt={category}
-                            className="w-full h-full object-cover"
-                          />
+                          {data.categoryImages[category] ? (
+                            <img
+                              src={data.categoryImages[category]}
+                              alt={category}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-blue-50 dark:bg-slate-800 flex items-center justify-center text-blue-300 dark:text-slate-500">
+                              <Package size={36} />
+                            </div>
+                          )}
                         </div>
                         <div className="text-left">
                           <h3 className="font-bold text-gray-800 dark:text-gray-100 text-sm sm:text-base">{category}</h3>
