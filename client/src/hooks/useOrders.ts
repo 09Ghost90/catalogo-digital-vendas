@@ -106,6 +106,14 @@ export function useOrders() {
     [orders, persist]
   );
 
+  const removeOrder = useCallback(
+    (orderCode: string) => {
+      const next = orders.filter((order) => order.code !== orderCode);
+      persist(next);
+    },
+    [orders, persist]
+  );
+
   const sortedOrders = useMemo(
     () => [...orders].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [orders]
@@ -115,5 +123,6 @@ export function useOrders() {
     orders: sortedOrders,
     createOrder,
     updateStatus,
+    removeOrder,
   };
 }

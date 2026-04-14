@@ -8,6 +8,9 @@ import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import AdminStock from "./pages/AdminStock";
+import AdminCreateOrder from "./pages/AdminCreateOrder";
+import AdminOrders from "./pages/AdminOrders";
 
 function Router() {
   return (
@@ -16,6 +19,9 @@ function Router() {
       <Route path={"/catalogo"} component={Home} />
       <Route path={"/login"} component={Login} />
       <Route path={"/admin"} component={Admin} />
+      <Route path={"/admin/estoque"} component={AdminStock} />
+      <Route path={"/admin/criar-pedido"} component={AdminCreateOrder} />
+      <Route path={"/admin/pedidos"} component={AdminOrders} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
