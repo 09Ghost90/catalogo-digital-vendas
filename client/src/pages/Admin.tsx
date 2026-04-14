@@ -78,7 +78,7 @@ export default function Admin() {
   const stock = useStockManager();
   const { orders, createOrder, updateStatus } = useOrders();
 
-  const [activeTab, setActiveTab] = useState<AdminTab>('estoque');
+  const [activeTab, setActiveTab] = useState<AdminTab | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -402,15 +402,6 @@ export default function Admin() {
           </div>
           <div className="flex items-center gap-2">
             <Button
-              onClick={() => {
-                setShowAddForm(true);
-                resetForm();
-              }}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm h-9 px-3 rounded-xl"
-            >
-              <Plus size={16} className="mr-1" /> Novo Produto
-            </Button>
-            <Button
               variant="ghost"
               onClick={() => {
                 logout();
@@ -444,41 +435,125 @@ export default function Admin() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setActiveTab('estoque')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-              activeTab === 'estoque'
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
-            }`}
-          >
-            <Box size={15} className="inline mr-1.5" /> Gestão de Estoque
-          </button>
-          <button
-            onClick={() => setActiveTab('criar-pedido')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-              activeTab === 'criar-pedido'
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
-            }`}
-          >
-            <ShoppingCart size={15} className="inline mr-1.5" /> Criar Pedido
-          </button>
-          <button
-            onClick={() => setActiveTab('pedidos')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-              activeTab === 'pedidos'
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
-            }`}
-          >
-            <ClipboardList size={15} className="inline mr-1.5" /> Pedidos
-          </button>
+        <div>
+          <p className="text-sm text-slate-300 mb-3">Escolha uma área para começar</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button
+              onClick={() => setActiveTab('estoque')}
+              className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/70 p-5 text-left transition-all duration-300 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-700/20 hover:-translate-y-0.5"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/40">
+                  <Box size={20} className="text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Gestão de Estoque</h2>
+              </div>
+              <p className="text-sm text-slate-300">Atualize quantidades, edite produtos e identifique estoque baixo.</p>
+              <p className="text-xs text-amber-300 mt-3">{stock.lowStockCount} item(ns) com estoque baixo</p>
+              <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-emerald-500/15 to-transparent rounded-bl-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-500" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab('criar-pedido')}
+              className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/70 p-5 text-left transition-all duration-300 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-700/20 hover:-translate-y-0.5"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
+                  <ShoppingCart size={20} className="text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Criar Pedido</h2>
+              </div>
+              <p className="text-sm text-slate-300">Fluxo rápido para vendedor em campo com carrinho e dados do cliente.</p>
+              <p className="text-xs text-slate-400 mt-3">Total atual no carrinho: R$ {sellerTotal.toFixed(2)}</p>
+              <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-blue-500/15 to-transparent rounded-bl-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-500" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab('pedidos')}
+              className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/70 p-5 text-left transition-all duration-300 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-700/20 hover:-translate-y-0.5"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-900/40">
+                  <ClipboardList size={20} className="text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Pedidos</h2>
+              </div>
+              <p className="text-sm text-slate-300">Acompanhe histórico completo, status e totais de cada pedido.</p>
+              <p className="text-xs text-orange-300 mt-3">{pendingOrders} pedido(s) pendente(s)</p>
+              <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-purple-500/15 to-transparent rounded-bl-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-500" />
+            </button>
+          </div>
+
+          {activeTab && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              <button
+                onClick={() => setActiveTab(null)}
+                className="px-3 py-2 rounded-xl text-sm font-medium border bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600"
+              >
+                Voltar para opções
+              </button>
+              <button
+                onClick={() => setActiveTab('estoque')}
+                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                  activeTab === 'estoque'
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                }`}
+              >
+                <Box size={15} className="inline mr-1.5" /> Gestão de Estoque
+              </button>
+              <button
+                onClick={() => setActiveTab('criar-pedido')}
+                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                  activeTab === 'criar-pedido'
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                }`}
+              >
+                <ShoppingCart size={15} className="inline mr-1.5" /> Criar Pedido
+              </button>
+              <button
+                onClick={() => setActiveTab('pedidos')}
+                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                  activeTab === 'pedidos'
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                }`}
+              >
+                <ClipboardList size={15} className="inline mr-1.5" /> Pedidos
+              </button>
+            </div>
+          )}
         </div>
 
         {activeTab === 'estoque' && (
           <section className="space-y-4">
+            <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-3 flex flex-wrap items-center gap-2">
+              <Button
+                onClick={() => {
+                  setShowAddForm(true);
+                  resetForm();
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm h-9 px-3 rounded-xl"
+              >
+                <Plus size={14} className="mr-1" /> Novo Produto
+              </Button>
+              <Button
+                onClick={() => setActiveTab('criar-pedido')}
+                variant="outline"
+                className="h-9 border-blue-600/40 text-blue-300 hover:bg-blue-500/10"
+              >
+                <ShoppingCart size={14} className="mr-1" /> Ir para Criar Pedido
+              </Button>
+              <Button
+                onClick={() => setActiveTab('pedidos')}
+                variant="outline"
+                className="h-9 border-purple-600/40 text-purple-300 hover:bg-purple-500/10"
+              >
+                <ClipboardList size={14} className="mr-1" /> Ver Pedidos
+              </Button>
+            </div>
+
             <div className="flex gap-3">
               <div className="relative flex-1">
                 <Search size={16} className="absolute left-3 top-2.5 text-slate-500" />
