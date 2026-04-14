@@ -9,12 +9,14 @@
  *   White:     #FFFFFF
  */
 
+import { useTheme } from '@/contexts/ThemeContext';
+
 interface LogoProps {
   /** 'horizontal' = icon + text side-by-side, 'stacked' = icon on top, text below */
   variant?: 'horizontal' | 'stacked' | 'icon';
   /** Tailwind className override for the wrapper */
   className?: string;
-  /** Whether to use the dark (white) variant for dark backgrounds */
+  /** Force dark (white) variant. If omitted, auto-detects from theme context. */
   dark?: boolean;
   /** Icon size in px (default 48 horizontal, 80 stacked) */
   size?: number;
@@ -69,21 +71,24 @@ function LogoIcon({ size = 48, dark = false }: { size?: number; dark?: boolean }
 /**
  * Full brand logo with icon + typography.
  * Uses Montserrat (loaded via Google Fonts in index.html).
+ * Auto-detects dark mode from ThemeContext; `dark` prop overrides if set.
  */
-export default function Logo({ variant = 'horizontal', className = '', dark = false, size }: LogoProps) {
-  const textColor = dark ? '#FFFFFF' : '#1B3A5C';
-  const subtitleColor = dark ? 'rgba(255,255,255,0.7)' : '#4A6A8A';
+export default function Logo({ variant = 'horizontal', className = '', dark, size }: LogoProps) {
+  const { theme } = useTheme();
+  const isDark = dark !== undefined ? dark : theme === 'dark';
+  const textColor = isDark ? '#FFFFFF' : '#1B3A5C';
+  const subtitleColor = isDark ? 'rgba(255,255,255,0.7)' : '#4A6A8A';
   const accentDot = '#E8752A';
 
   if (variant === 'icon') {
-    return <LogoIcon size={size || 48} dark={dark} />;
+    return <LogoIcon size={size || 48} dark={isDark} />;
   }
 
   if (variant === 'stacked') {
     const iconSize = size || 80;
     return (
       <div className={`flex flex-col items-center gap-2 ${className}`}>
-        <LogoIcon size={iconSize} dark={dark} />
+        <LogoIcon size={iconSize} dark={isDark} />
         <div className="text-center" style={{ fontFamily: "'Montserrat', sans-serif" }}>
           <p
             className="text-[10px] sm:text-xs tracking-[0.25em] uppercase font-medium"
@@ -107,7 +112,7 @@ export default function Logo({ variant = 'horizontal', className = '', dark = fa
   const iconSize = size || 44;
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <LogoIcon size={iconSize} dark={dark} />
+      <LogoIcon size={iconSize} dark={isDark} />
       <div style={{ fontFamily: "'Montserrat', sans-serif" }}>
         <p
           className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase font-medium leading-none"
