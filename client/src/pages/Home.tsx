@@ -1,7 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal, UserPlus, Edit3, Package, Eye, Phone } from 'lucide-react';
+import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal, UserPlus, Edit3, Package, Eye, Phone, UserCircle2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import CartDrawer from '@/components/CartDrawer';
@@ -26,6 +32,8 @@ export default function Home() {
   const customer = useCustomer();
   const allCategories = Object.keys(data?.categorias || {}).sort();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [simpleLoginOpen, setSimpleLoginOpen] = useState(false);
+  const [simpleLoginContact, setSimpleLoginContact] = useState('');
   const [profileForm, setProfileForm] = useState<CustomerProfile>(customer.profile);
 
   const filteredProducts = useMemo(() => {
@@ -129,6 +137,33 @@ export default function Home() {
     setProfileModalOpen(true);
   };
 
+  const handleSimpleLogin = () => {
+    if (!simpleLoginContact.trim()) {
+      toast.error('Informe seu WhatsApp para continuar');
+      return;
+    }
+
+    if (!customer.hasProfile) {
+      setSimpleLoginOpen(false);
+      setSimpleLoginContact('');
+      toast.message('Nenhum perfil salvo neste dispositivo. Crie seu perfil para continuar.');
+      openProfileModal();
+      return;
+    }
+
+    const inputContact = simpleLoginContact.replace(/\D/g, '');
+    const savedContact = customer.profile.contato.replace(/\D/g, '');
+
+    if (inputContact && inputContact === savedContact) {
+      setSimpleLoginOpen(false);
+      setSimpleLoginContact('');
+      toast.success('Perfil carregado com sucesso!');
+      return;
+    }
+
+    toast.error('Contato não encontrado neste dispositivo');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
       {/* Profile Modal */}
@@ -184,6 +219,52 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Simple Customer Login Modal */}
+      {simpleLoginOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSimpleLoginOpen(false)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <LogIn size={18} className="text-blue-600" />
+                Já sou cliente
+              </h2>
+              <button
+                onClick={() => setSimpleLoginOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                aria-label="Fechar login simples"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Digite seu WhatsApp para acessar rapidamente.
+            </p>
+            <Input
+              value={simpleLoginContact}
+              onChange={(e) => setSimpleLoginContact(e.target.value)}
+              placeholder="(00) 00000-0000"
+              className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+            />
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setSimpleLoginOpen(false)}
+                className="flex-1 rounded-xl"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSimpleLogin}
+                className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Entrar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-sm border-b border-blue-100 dark:border-slate-800 transition-colors duration-300">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
@@ -197,6 +278,47 @@ export default function Home() {
               </a>
             </div>
             <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="relative p-2 sm:p-2.5 rounded-full bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md hover:shadow-blue-500/10 transition-all duration-200 hover:-translate-y-0.5"
+                    aria-label="Abrir opções de perfil"
+                  >
+                    <UserCircle2 size={20} />
+                    {customer.hasProfile && (
+                      <span className="absolute -top-0.5 -right-0.5 block w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-52 rounded-xl border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                >
+                  <DropdownMenuItem
+                    onClick={openProfileModal}
+                    className="rounded-lg text-gray-700 dark:text-gray-200 cursor-pointer"
+                  >
+                    {customer.hasProfile ? (
+                      <>
+                        <Edit3 size={16} className="text-blue-600" />
+                        Editar perfil
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus size={16} className="text-blue-600" />
+                        Criar perfil
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSimpleLoginOpen(true)}
+                    className="rounded-lg text-gray-700 dark:text-gray-200 cursor-pointer"
+                  >
+                    <LogIn size={16} className="text-emerald-600" />
+                    Já sou cliente (login simples)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               {/* Cart Button */}
               <button
                 onClick={() => setCartOpen(true)}
@@ -212,29 +334,6 @@ export default function Home() {
               </button>
               <ThemeToggle />
             </div>
-          </div>
-
-          {/* Profile + Cart actions area */}
-          <div className="mb-3 flex items-center gap-2">
-            <div className="flex-1 min-w-0">
-              {customer.hasProfile ? (
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Olá, <span className="font-semibold text-blue-600 dark:text-blue-400">{customer.profile.nome.split(' ')[0]}</span>! 👋
-                </span>
-              ) : (
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-blue-600 dark:text-blue-400">Crie seu perfil</span> para agilizar pedidos
-                </span>
-              )}
-            </div>
-            <Button
-              onClick={openProfileModal}
-              variant="outline"
-              size="sm"
-              className="rounded-xl text-xs border-blue-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 flex-shrink-0 gap-1.5"
-            >
-              {customer.hasProfile ? <><Edit3 size={12} /> Editar perfil</> : <><UserPlus size={12} /> Criar perfil</>}
-            </Button>
           </div>
 
           {/* Search Bar */}
