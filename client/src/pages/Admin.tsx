@@ -64,12 +64,20 @@ type AdminTab = 'estoque' | 'criar-pedido' | 'pedidos';
 
 interface SellerCartItem {
   source: 'catalog' | 'manual';
+  priceMode: 'unitario' | 'embalagem';
   product: Produto;
   quantity: number;
 }
 
 function stockKey(product: Produto): string {
   return `${product.categoria}::${product.id}`;
+}
+
+function getSellerItemPrice(item: SellerCartItem): number {
+  if (item.priceMode === 'embalagem') {
+    return item.product.preco_embalagem || item.product.preco_unitario;
+  }
+  return item.product.preco_unitario;
 }
 
 export default function Admin() {
@@ -91,7 +99,15 @@ export default function Admin() {
 
   const [sellerSearch, setSellerSearch] = useState('');
   const [sellerCart, setSellerCart] = useState<SellerCartItem[]>([]);
-  const [quickProductForm, setQuickProductForm] = useState({ nome: '', valor: '', quantidade: '1' });
+  const [quickProductForm, setQuickProductForm] = useState({
+    nome: '',
+    descricao: '',
+    unidade: 'Un.',
+    valorUnitario: '',
+    valorEmbalagem: '',
+    quantidade: '1',
+    priceMode: 'unitario' as 'unitario' | 'embalagem',
+  });
   const [customerData, setCustomerData] = useState({ nome: '', telefone: '', endereco: '' });
 
   const [formData, setFormData] = useState({
@@ -147,8 +163,21 @@ export default function Admin() {
   }, [catalog, sellerSearch]);
 
   const sellerTotal = useMemo(() => {
-    return sellerCart.reduce((acc, item) => acc + item.product.preco_unitario * item.quantity, 0);
+    return sellerCart.reduce((acc, item) => acc + getSellerItemPrice(item) * item.quantity, 0);
   }, [sellerCart]);
+
+  const quickProductTotal = useMemo(() => {
+    const quantidade = Number.parseInt(quickProductForm.quantidade, 10);
+    const valorBase = quickProductForm.priceMode === 'embalagem'
+      ? Number.parseFloat(quickProductForm.valorEmbalagem)
+      : Number.parseFloat(quickProductForm.valorUnitario);
+
+    if (Number.isNaN(quantidade) || quantidade <= 0 || Number.isNaN(valorBase) || valorBase <= 0) {
+      return 0;
+    }
+
+    return quantidade * valorBase;
+  }, [quickProductForm]);
 
   useEffect(() => {
     const nextDrafts: Record<string, string> = {};
@@ -335,13 +364,15 @@ export default function Admin() {
             : item
         );
       }
-      return [...prev, { source: 'catalog', product, quantity: 1 }];
+      return [...prev, { source: 'catalog', priceMode: 'unitario', product, quantity: 1 }];
     });
   };
 
   const addManualProduct = () => {
     const nome = quickProductForm.nome.trim();
-    const valor = Number.parseFloat(quickProductForm.valor);
+    const descricao = quickProductForm.descricao.trim();
+    const valorUnitario = Number.parseFloat(quickProductForm.valorUnitario);
+    const valorEmbalagem = Number.parseFloat(quickProductForm.valorEmbalagem);
     const quantidade = Number.parseInt(quickProductForm.quantidade, 10);
 
     if (!nome) {
@@ -349,8 +380,8 @@ export default function Admin() {
       return;
     }
 
-    if (Number.isNaN(valor) || valor <= 0) {
-      toast.error('Informe um valor válido.');
+    if (Number.isNaN(valorUnitario) || valorUnitario <= 0) {
+      toast.error('Informe um valor unitário válido.');
       return;
     }
 
@@ -359,20 +390,47 @@ export default function Admin() {
       return;
     }
 
+    if (quickProductForm.priceMode === 'embalagem' && (Number.isNaN(valorEmbalagem) || valorEmbalagem <= 0)) {
+      toast.error('Informe o valor total da embalagem (caixa/dúzia).');
+      return;
+    }
+
+    const safeValorEmbalagem = Number.isNaN(valorEmbalagem) || valorEmbalagem <= 0
+      ? valorUnitario
+      : valorEmbalagem;
+
+    const nomeCompleto = descricao ? `${nome} - ${descricao}` : nome;
+
     const manualProduct: Produto = {
       id: -Math.floor(Date.now() + Math.random() * 1000),
       nome,
-      nome_completo: nome,
+      nome_completo: nomeCompleto,
       categoria: 'Item avulso',
-      preco_unitario: valor,
-      preco_embalagem: valor,
-      unidade: 'Un.',
+      preco_unitario: valorUnitario,
+      preco_embalagem: safeValorEmbalagem,
+      unidade: quickProductForm.unidade,
       icon: 'Package',
       imagens: [],
     };
 
-    setSellerCart((prev) => [...prev, { source: 'manual', product: manualProduct, quantity: quantidade }]);
-    setQuickProductForm({ nome: '', valor: '', quantidade: '1' });
+    setSellerCart((prev) => [
+      ...prev,
+      {
+        source: 'manual',
+        priceMode: quickProductForm.priceMode,
+        product: manualProduct,
+        quantity: quantidade,
+      },
+    ]);
+    setQuickProductForm({
+      nome: '',
+      descricao: '',
+      unidade: quickProductForm.unidade,
+      valorUnitario: '',
+      valorEmbalagem: '',
+      quantidade: '1',
+      priceMode: quickProductForm.priceMode,
+    });
     toast.success('Item adicionado ao carrinho.');
   };
 
@@ -407,8 +465,8 @@ export default function Admin() {
       nome: item.product.nome_completo || item.product.nome,
       categoria: item.product.categoria,
       quantidade: item.quantity,
-      precoUnitario: item.product.preco_unitario,
-      subtotal: item.quantity * item.product.preco_unitario,
+      precoUnitario: getSellerItemPrice(item),
+      subtotal: item.quantity * getSellerItemPrice(item),
     }));
 
     const newOrder = createOrder({
@@ -719,16 +777,22 @@ export default function Admin() {
                   className="bg-slate-900 border-slate-700 text-white h-9"
                   placeholder="Nome do produto"
                 />
+                <Input
+                  value={quickProductForm.descricao}
+                  onChange={(e) => setQuickProductForm((p) => ({ ...p, descricao: e.target.value }))}
+                  className="bg-slate-900 border-slate-700 text-white h-9"
+                  placeholder="Descrição"
+                />
                 <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={quickProductForm.valor}
-                    onChange={(e) => setQuickProductForm((p) => ({ ...p, valor: e.target.value }))}
-                    className="bg-slate-900 border-slate-700 text-white h-9"
-                    placeholder="Valor"
-                  />
+                  <select
+                    value={quickProductForm.unidade}
+                    onChange={(e) => setQuickProductForm((p) => ({ ...p, unidade: e.target.value }))}
+                    className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 h-9"
+                  >
+                    <option value="Un.">Un.</option>
+                    <option value="Dz.">Dz.</option>
+                    <option value="Cx.">Cx.</option>
+                  </select>
                   <Input
                     type="number"
                     min="1"
@@ -739,6 +803,37 @@ export default function Admin() {
                     placeholder="Quantidade"
                   />
                 </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={quickProductForm.valorUnitario}
+                    onChange={(e) => setQuickProductForm((p) => ({ ...p, valorUnitario: e.target.value }))}
+                    className="bg-slate-900 border-slate-700 text-white h-9"
+                    placeholder="Valor unitário"
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={quickProductForm.valorEmbalagem}
+                    onChange={(e) => setQuickProductForm((p) => ({ ...p, valorEmbalagem: e.target.value }))}
+                    className="bg-slate-900 border-slate-700 text-white h-9"
+                    placeholder="Valor total (cx/dz)"
+                  />
+                </div>
+                <select
+                  value={quickProductForm.priceMode}
+                  onChange={(e) => setQuickProductForm((p) => ({ ...p, priceMode: e.target.value as 'unitario' | 'embalagem' }))}
+                  className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 h-9"
+                >
+                  <option value="unitario">Preço aplicado: Unitário</option>
+                  <option value="embalagem">Preço aplicado: Caixa/Dúzia</option>
+                </select>
+                <p className="text-xs text-slate-400">
+                  Total do item: <span className="text-slate-200 font-medium">R$ {quickProductTotal.toFixed(2)}</span>
+                </p>
                 <Button
                   onClick={addManualProduct}
                   className="w-full h-9 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
@@ -754,7 +849,9 @@ export default function Admin() {
                   <div key={`${item.product.categoria}-${item.product.id}`} className="border border-slate-700 rounded-lg p-2">
                     <p className="text-sm truncate">{item.product.nome}</p>
                     {item.source === 'manual' && (
-                      <p className="text-xs text-blue-300">Item manual</p>
+                      <p className="text-xs text-blue-300">
+                        Item manual • {item.product.unidade} • {item.priceMode === 'embalagem' ? 'Preço caixa/dúzia' : 'Preço unitário'}
+                      </p>
                     )}
                     <div className="mt-1 flex items-center justify-between">
                       <div className="flex items-center gap-1">
@@ -772,7 +869,7 @@ export default function Admin() {
                           <Plus size={13} />
                         </button>
                       </div>
-                      <span className="text-sm font-semibold">R$ {(item.quantity * item.product.preco_unitario).toFixed(2)}</span>
+                      <span className="text-sm font-semibold">R$ {(item.quantity * getSellerItemPrice(item)).toFixed(2)}</span>
                     </div>
                   </div>
                 ))}
