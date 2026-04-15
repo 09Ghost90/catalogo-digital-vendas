@@ -11,6 +11,7 @@ export interface Produto {
   unidade: string;
   icon: string;
   imagens?: string[];
+  estoque?: number;
 }
 
 export interface CatalogData {
@@ -66,6 +67,7 @@ export function useCatalog() {
           unidade: row.unidade,
           icon: row.icon || 'Package',
           imagens: row.imagens || [],
+          estoque: Number.isFinite(Number(row.estoque)) ? Math.max(0, Math.floor(Number(row.estoque))) : 0,
         });
       }
 

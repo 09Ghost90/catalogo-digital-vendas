@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 const STOCK_STORAGE_KEY = 'admin_stock_by_product';
 
@@ -20,16 +21,56 @@ function parseStockKey(key: string): { categoria: string; id: number | null } {
 export function useStockManager() {
   const [stockMap, setStockMap] = useState<Record<string, number>>({});
 
+  const syncFromSupabase = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, categoria, estoque');
+
+      if (error) throw error;
+
+      const remoteMap: Record<string, number> = {};
+      (data || []).forEach((row: any) => {
+        const qty = Number.isFinite(Number(row.estoque)) ? Math.max(0, Math.floor(Number(row.estoque))) : 0;
+        remoteMap[getKey(String(row.categoria || ''), Number(row.id))] = qty;
+      });
+
+      setStockMap(remoteMap);
+      localStorage.setItem(STOCK_STORAGE_KEY, JSON.stringify(remoteMap));
+    } catch (error) {
+      console.error('Erro ao sincronizar estoque do Supabase:', error);
+    }
+  }, []);
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STOCK_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as Record<string, number>;
-      setStockMap(parsed || {});
+      if (raw) {
+        const parsed = JSON.parse(raw) as Record<string, number>;
+        setStockMap(parsed || {});
+      }
     } catch {
       setStockMap({});
     }
-  }, []);
+
+    void syncFromSupabase();
+  }, [syncFromSupabase]);
+
+  useEffect(() => {
+    const onFocus = () => {
+      void syncFromSupabase();
+    };
+
+    window.addEventListener('focus', onFocus);
+    const interval = window.setInterval(() => {
+      void syncFromSupabase();
+    }, 15000);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.clearInterval(interval);
+    };
+  }, [syncFromSupabase]);
 
   const persist = useCallback((next: Record<string, number>) => {
     setStockMap(next);
@@ -50,6 +91,16 @@ export function useStockManager() {
       const key = getKey(categoria, id);
       const next = { ...stockMap, [key]: safeQty };
       persist(next);
+
+      void supabase
+        .from('products')
+        .update({ estoque: safeQty })
+        .eq('id', id)
+        .then(({ error }) => {
+          if (error) {
+            console.error('Erro ao atualizar estoque no Supabase:', error);
+          }
+        });
     },
     [stockMap, persist]
   );

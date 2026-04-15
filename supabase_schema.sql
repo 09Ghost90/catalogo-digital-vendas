@@ -4,12 +4,16 @@ CREATE TABLE products (
   nome TEXT NOT NULL,
   nome_completo TEXT,
   categoria TEXT NOT NULL,
+  estoque INT NOT NULL DEFAULT 0,
   preco_unitario NUMERIC NOT NULL,
   preco_embalagem NUMERIC NOT NULL,
   unidade TEXT NOT NULL,
   icon TEXT DEFAULT 'Package',
   imagens JSONB DEFAULT '[]'::jsonb
 );
+
+-- If your products table already exists, run this migration safely:
+ALTER TABLE products ADD COLUMN IF NOT EXISTS estoque INT NOT NULL DEFAULT 0;
 
 -- 2. Create the `category_images` table
 CREATE TABLE category_images (
