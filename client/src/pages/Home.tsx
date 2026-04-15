@@ -604,7 +604,7 @@ export default function Home() {
                           </p>
 
                           {/* Preços */}
-                          <div className="bg-gradient-to-br from-blue-50 to-blue-50/30 dark:from-slate-800/80 dark:to-slate-800/40 rounded-xl p-2 sm:p-3 mb-2 sm:mb-3">
+                          <div className="bg-gradient-to-br from-blue-50 to-blue-50/30 dark:from-slate-800/80 dark:to-slate-800/40 rounded-xl p-2 sm:p-3 mb-2 sm:mb-3 text-center">
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Unitário</p>
                             <p className="text-lg sm:text-xl font-bold text-blue-600">
                               R$ {product.preco_unitario.toFixed(2)}
