@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, ClipboardList, LogOut, Minus, Plus, Search, ShoppingCart, Box } from 'lucide-react';
+import { ArrowLeft, LogOut, Minus, Plus, Search, ShoppingCart } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,40 @@ function getSellerItemPrice(item: SellerCartItem): number {
     return item.product.preco_embalagem || item.product.preco_unitario;
   }
   return item.product.preco_unitario;
+}
+
+function formatWhatsAppPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.startsWith('55') ? digits : `55${digits}`;
+}
+
+function buildOrderWhatsAppMessage(order: {
+  code: string;
+  customerNome: string;
+  customerTelefone: string;
+  customerEndereco: string;
+  items: AdminOrderItem[];
+  total: number;
+}): string {
+  const lines: string[] = [];
+  lines.push(`Pedido ${order.code}`);
+  lines.push('');
+  lines.push('Dados do cliente');
+  lines.push(`Nome: ${order.customerNome}`);
+  lines.push(`Contato: ${order.customerTelefone}`);
+  lines.push(`Endereco: ${order.customerEndereco}`);
+  lines.push('');
+  lines.push('Itens do pedido');
+
+  order.items.forEach((item, idx) => {
+    lines.push(`${idx + 1}. ${item.nome}`);
+    lines.push(`Qtd: ${item.quantidade} | Unitario: R$ ${item.precoUnitario.toFixed(2)} | Subtotal: R$ ${item.subtotal.toFixed(2)}`);
+  });
+
+  lines.push('');
+  lines.push(`Total: R$ ${order.total.toFixed(2)}`);
+  return lines.join('\n');
 }
 
 export default function AdminCreateOrder() {
@@ -233,6 +267,13 @@ export default function AdminCreateOrder() {
 
     setSellerCart([]);
     setCustomerData({ nome: '', telefone: '', endereco: '' });
+    const targetPhone = formatWhatsAppPhone(newOrder.customerTelefone);
+    const message = buildOrderWhatsAppMessage(newOrder);
+    const shareUrl = targetPhone
+      ? `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+    window.open(shareUrl, '_blank');
     toast.success(`Pedido ${newOrder.code} gerado com sucesso.`);
     navigate('/admin/pedidos');
   };
@@ -263,14 +304,6 @@ export default function AdminCreateOrder() {
 
       <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-2xl border border-slate-700 bg-slate-800/50 p-4">
-          <div className="flex flex-wrap gap-2 mb-3">
-            <Button asChild variant="outline" className="h-8 border-blue-600/40 text-blue-300 hover:bg-blue-500/10">
-              <a href="/admin/estoque"><Box size={14} className="mr-1" /> Gestão de Estoque</a>
-            </Button>
-            <Button asChild variant="outline" className="h-8 border-purple-600/40 text-purple-300 hover:bg-purple-500/10">
-              <a href="/admin/pedidos"><ClipboardList size={14} className="mr-1" /> Pedidos</a>
-            </Button>
-          </div>
           <div className="relative mb-3">
             <Search size={16} className="absolute left-3 top-2.5 text-slate-500" />
             <Input

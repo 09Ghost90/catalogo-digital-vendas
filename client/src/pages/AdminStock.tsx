@@ -12,8 +12,6 @@ import {
   AlertTriangle,
   Image as ImageIcon,
   Upload,
-  ShoppingCart,
-  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -287,38 +285,31 @@ export default function AdminStock() {
             </a>
             <h1 className="text-lg font-bold text-white">Gestão de Estoque</h1>
           </div>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              logout();
-              window.location.href = '/';
-            }}
-            className="text-slate-400 hover:text-red-400 h-9 px-2"
-          >
-            <LogOut size={16} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => {
+                setShowAddForm(true);
+                resetForm();
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm h-9 px-3 rounded-xl"
+            >
+              <Plus size={14} className="mr-1" /> Novo Produto
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                logout();
+                window.location.href = '/';
+              }}
+              className="text-slate-400 hover:text-red-400 h-9 px-2"
+            >
+              <LogOut size={16} />
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-3 flex flex-wrap items-center gap-2">
-          <Button
-            onClick={() => {
-              setShowAddForm(true);
-              resetForm();
-            }}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm h-9 px-3 rounded-xl"
-          >
-            <Plus size={14} className="mr-1" /> Novo Produto
-          </Button>
-          <Button asChild variant="outline" className="h-9 border-blue-600/40 text-blue-300 hover:bg-blue-500/10">
-            <a href="/admin/criar-pedido"><ShoppingCart size={14} className="mr-1" /> Ir para Criar Pedido</a>
-          </Button>
-          <Button asChild variant="outline" className="h-9 border-purple-600/40 text-purple-300 hover:bg-purple-500/10">
-            <a href="/admin/pedidos"><ClipboardList size={14} className="mr-1" /> Ver Pedidos</a>
-          </Button>
-        </div>
-
         <div className="flex gap-3">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-2.5 text-slate-500" />

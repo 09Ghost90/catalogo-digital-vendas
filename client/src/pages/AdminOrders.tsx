@@ -1,9 +1,36 @@
-import { ArrowLeft, ClipboardList, LogOut, Trash2 } from 'lucide-react';
+import { ArrowLeft, LogOut, MessageCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAdmin';
 import { useOrders } from '@/hooks/useOrders';
-import type { OrderStatus } from '@/hooks/useOrders';
+import type { AdminOrder, OrderStatus } from '@/hooks/useOrders';
 import { toast } from 'sonner';
+
+function formatWhatsAppPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.startsWith('55') ? digits : `55${digits}`;
+}
+
+function buildOrderWhatsAppMessage(order: AdminOrder): string {
+  const lines: string[] = [];
+  lines.push(`Pedido ${order.code}`);
+  lines.push('');
+  lines.push('Dados do cliente');
+  lines.push(`Nome: ${order.customerNome}`);
+  lines.push(`Contato: ${order.customerTelefone}`);
+  lines.push(`Endereco: ${order.customerEndereco}`);
+  lines.push('');
+  lines.push('Itens do pedido');
+
+  order.items.forEach((item, idx) => {
+    lines.push(`${idx + 1}. ${item.nome}`);
+    lines.push(`Qtd: ${item.quantidade} | Unitario: R$ ${item.precoUnitario.toFixed(2)} | Subtotal: R$ ${item.subtotal.toFixed(2)}`);
+  });
+
+  lines.push('');
+  lines.push(`Total: R$ ${order.total.toFixed(2)}`);
+  return lines.join('\n');
+}
 
 export default function AdminOrders() {
   const { isAuthenticated, logout } = useAuth();
@@ -20,6 +47,16 @@ export default function AdminOrders() {
 
     removeOrder(orderCode);
     toast.success(`Pedido ${orderCode} removido.`);
+  };
+
+  const handleShareOrder = (order: AdminOrder) => {
+    const targetPhone = formatWhatsAppPhone(order.customerTelefone);
+    const message = buildOrderWhatsAppMessage(order);
+    const shareUrl = targetPhone
+      ? `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+    window.open(shareUrl, '_blank');
   };
 
   return (
@@ -62,6 +99,15 @@ export default function AdminOrders() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-400">{new Date(order.createdAt).toLocaleString('pt-BR')}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleShareOrder(order)}
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-green-400"
+                        title="Compartilhar no WhatsApp"
+                      >
+                        <MessageCircle size={14} />
+                      </Button>
                       <select
                         value={order.status}
                         onChange={(e) => updateStatus(order.code, e.target.value as OrderStatus)}
