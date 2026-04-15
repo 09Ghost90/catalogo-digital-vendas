@@ -20,7 +20,7 @@ export default function Landing() {
         <div className="space-y-4">
           {/* Client Button */}
           <button
-            onClick={() => navigate('/catalogo')}
+            onClick={() => navigate('/')}
             className="w-full group relative overflow-hidden rounded-2xl border-2 border-blue-100 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 text-left transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:shadow-blue-600/10 hover:-translate-y-0.5"
           >
             <div className="flex items-center gap-4">

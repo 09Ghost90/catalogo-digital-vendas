@@ -311,36 +311,8 @@ export default function AdminCreateOrder() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 rounded-2xl border border-slate-700 bg-slate-800/50 p-4">
-          <div className="relative mb-3">
-            <Search size={16} className="absolute left-3 top-2.5 text-slate-500" />
-            <Input
-              value={sellerSearch}
-              onChange={(e) => setSellerSearch(e.target.value)}
-              placeholder="Buscar produto para adicionar..."
-              className="pl-9 bg-slate-900 border-slate-700 text-white h-9 rounded-xl"
-            />
-          </div>
-          <div className="space-y-2 max-h-[68vh] overflow-y-auto pr-1">
-            {sellerProducts.map((product) => (
-              <div
-                key={`${product.categoria}-${product.id}`}
-                className="border border-slate-700 rounded-xl p-3 flex items-center justify-between"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{product.nome_completo || product.nome}</p>
-                  <p className="text-xs text-slate-400">{product.categoria} • R$ {product.preco_unitario.toFixed(2)}</p>
-                </div>
-                <Button onClick={() => addSellerProduct(product)} size="sm" className="h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white">
-                  <Plus size={14} className="mr-1" /> Adicionar
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-4 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-4">
           <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3 space-y-2">
             <p className="text-sm font-semibold">Adicionar produto rápido</p>
             <Input
@@ -416,7 +388,37 @@ export default function AdminCreateOrder() {
               Adicionar item manual
             </Button>
           </div>
+        </div>
 
+        <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-4">
+          <div className="relative mb-3">
+            <Search size={16} className="absolute left-3 top-2.5 text-slate-500" />
+            <Input
+              value={sellerSearch}
+              onChange={(e) => setSellerSearch(e.target.value)}
+              placeholder="Buscar produto para adicionar..."
+              className="pl-9 bg-slate-900 border-slate-700 text-white h-9 rounded-xl"
+            />
+          </div>
+          <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+            {sellerProducts.map((product) => (
+              <div
+                key={`${product.categoria}-${product.id}`}
+                className="border border-slate-700 rounded-xl p-3 flex items-center justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{product.nome_completo || product.nome}</p>
+                  <p className="text-xs text-slate-400">{product.categoria} • R$ {product.preco_unitario.toFixed(2)}</p>
+                </div>
+                <Button onClick={() => addSellerProduct(product)} size="sm" className="h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <Plus size={14} className="mr-1" /> Adicionar
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-4 space-y-4">
           <h2 className="font-semibold">Carrinho do Pedido</h2>
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
             {sellerCart.length === 0 && <p className="text-sm text-slate-400">Nenhum item adicionado.</p>}
