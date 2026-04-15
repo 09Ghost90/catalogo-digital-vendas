@@ -58,6 +58,14 @@ function stockKey(product: Produto): string {
   return `${product.categoria}::${product.id}`;
 }
 
+function normalizeCategoryName(value: string): string {
+  return value.trim().replace(/\s+/g, ' ');
+}
+
+const UNLINK_FALLBACK_CATEGORY = 'Sem categoria';
+
+type CategoryModalMode = 'create' | 'edit';
+
 export default function AdminStock() {
   const { isAuthenticated, logout } = useAuth();
   const pm = useProductManager();
@@ -83,6 +91,16 @@ export default function AdminStock() {
     newCategoryImage: '',
   });
 
+  const [categoryModalMode, setCategoryModalMode] = useState<CategoryModalMode | null>(null);
+  const [categoryForm, setCategoryForm] = useState({
+    originalName: '',
+    name: '',
+    image: '',
+  });
+  const [deleteCategoryTarget, setDeleteCategoryTarget] = useState<string | null>(null);
+  const [deleteCategoryAction, setDeleteCategoryAction] = useState<'unlink' | 'move'>('move');
+  const [deleteCategoryMoveTarget, setDeleteCategoryMoveTarget] = useState('');
+
   const allProducts = useMemo(() => {
     if (!catalog) return [];
     let products = Object.values(catalog.categorias).flat();
@@ -104,7 +122,24 @@ export default function AdminStock() {
     return products.sort((a, b) => a.nome.localeCompare(b.nome));
   }, [catalog, searchTerm, filterCategory]);
 
-  const categories = useMemo(() => Object.keys(catalog?.categorias || {}).sort(), [catalog]);
+  const categorySummaries = useMemo(() => {
+    if (!catalog) return [] as Array<{ name: string; image: string; productCount: number }>;
+
+    const names = new Set<string>([
+      ...Object.keys(catalog.categorias || {}),
+      ...Object.keys(catalog.categoryImages || {}),
+    ]);
+
+    return Array.from(names)
+      .sort((a, b) => a.localeCompare(b))
+      .map((name) => ({
+        name,
+        image: catalog.categoryImages?.[name] || '',
+        productCount: catalog.categorias?.[name]?.length || 0,
+      }));
+  }, [catalog]);
+
+  const categories = useMemo(() => categorySummaries.map((item) => item.name), [categorySummaries]);
 
   useEffect(() => {
     const nextDrafts: Record<string, string> = {};
@@ -150,6 +185,36 @@ export default function AdminStock() {
     resetForm();
   };
 
+  const closeCategoryModal = () => {
+    setCategoryModalMode(null);
+    setCategoryForm({ originalName: '', name: '', image: '' });
+  };
+
+  const openCreateCategoryModal = () => {
+    setCategoryForm({ originalName: '', name: '', image: '' });
+    setCategoryModalMode('create');
+  };
+
+  const openEditCategoryModal = (categoryName: string) => {
+    const summary = categorySummaries.find((item) => item.name === categoryName);
+    setCategoryForm({
+      originalName: categoryName,
+      name: categoryName,
+      image: summary?.image || '',
+    });
+    setCategoryModalMode('edit');
+  };
+
+  const hasCategoryNameConflict = (name: string, except?: string) => {
+    const normalized = normalizeCategoryName(name).toLowerCase();
+    if (!normalized) return false;
+    const exceptNormalized = normalizeCategoryName(except || '').toLowerCase();
+    return categorySummaries.some((item) => {
+      const current = normalizeCategoryName(item.name).toLowerCase();
+      return current === normalized && current !== exceptNormalized;
+    });
+  };
+
   const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -178,11 +243,146 @@ export default function AdminStock() {
     }
   };
 
+  const handleManagedCategoryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const base64 = await compressImage(file, 800, 800);
+      setCategoryForm((prev) => ({ ...prev, image: base64 }));
+    } catch {
+      toast.error('Falha ao processar imagem da categoria.');
+    }
+  };
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = normalizeCategoryName(categoryForm.name);
+
+    if (!name) {
+      toast.error('Nome da categoria é obrigatório.');
+      return;
+    }
+
+    if (hasCategoryNameConflict(name)) {
+      toast.error('Já existe uma categoria com esse nome.');
+      return;
+    }
+
+    if (!categoryForm.image) {
+      toast.error('Envie uma imagem para a categoria.');
+      return;
+    }
+
+    toast.loading('Criando categoria...', { id: 'create-category' });
+    const result = await pm.createCategory(name, categoryForm.image);
+    if (result.success) {
+      toast.success('Categoria criada com sucesso.', { id: 'create-category' });
+      closeCategoryModal();
+      refetch();
+    } else {
+      toast.error(result.error || 'Erro ao criar categoria.', { id: 'create-category' });
+    }
+  };
+
+  const handleEditCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const oldName = normalizeCategoryName(categoryForm.originalName);
+    const nextName = normalizeCategoryName(categoryForm.name);
+
+    if (!nextName) {
+      toast.error('Nome da categoria é obrigatório.');
+      return;
+    }
+
+    if (hasCategoryNameConflict(nextName, oldName)) {
+      toast.error('Já existe uma categoria com esse nome.');
+      return;
+    }
+
+    toast.loading('Atualizando categoria...', { id: 'edit-category' });
+    const result = await pm.updateCategory(oldName, nextName, categoryForm.image || undefined);
+    if (result.success) {
+      if (oldName.toLowerCase() !== nextName.toLowerCase()) {
+        stock.remapCategory(oldName, nextName);
+      }
+      toast.success('Categoria atualizada.', { id: 'edit-category' });
+      closeCategoryModal();
+      refetch();
+    } else {
+      toast.error(result.error || 'Erro ao atualizar categoria.', { id: 'edit-category' });
+    }
+  };
+
+  const openDeleteCategoryDialog = (categoryName: string) => {
+    const moveCandidates = categories.filter((item) => item !== categoryName);
+    setDeleteCategoryAction(moveCandidates.length > 0 ? 'move' : 'unlink');
+    setDeleteCategoryMoveTarget(moveCandidates[0] || '');
+    setDeleteCategoryTarget(categoryName);
+  };
+
+  const closeDeleteCategoryDialog = () => {
+    setDeleteCategoryTarget(null);
+    setDeleteCategoryAction('move');
+    setDeleteCategoryMoveTarget('');
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!deleteCategoryTarget) return;
+
+    const summary = categorySummaries.find((item) => item.name === deleteCategoryTarget);
+    const linkedProducts = summary?.productCount || 0;
+    const strategy = linkedProducts > 0 ? deleteCategoryAction : 'unlink';
+
+    if (strategy === 'move' && !deleteCategoryMoveTarget) {
+      toast.error('Selecione a categoria de destino para mover os produtos.');
+      return;
+    }
+
+    if (strategy === 'unlink' && normalizeCategoryName(deleteCategoryTarget) === normalizeCategoryName(UNLINK_FALLBACK_CATEGORY)) {
+      toast.error('Escolha a opção de mover produtos para excluir esta categoria.');
+      return;
+    }
+
+    toast.loading('Excluindo categoria...', { id: 'delete-category' });
+    const result = await pm.deleteCategory({
+      categoryName: deleteCategoryTarget,
+      strategy,
+      targetCategory: strategy === 'move' ? deleteCategoryMoveTarget : undefined,
+    });
+
+    if (result.success) {
+      if (linkedProducts > 0) {
+        const target = strategy === 'move' ? deleteCategoryMoveTarget : UNLINK_FALLBACK_CATEGORY;
+        stock.remapCategory(deleteCategoryTarget, target);
+      }
+      stock.clearCategory(deleteCategoryTarget);
+      toast.success('Categoria excluída.', { id: 'delete-category' });
+      closeDeleteCategoryDialog();
+      refetch();
+    } else {
+      toast.error(result.error || 'Erro ao excluir categoria.', { id: 'delete-category' });
+    }
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const categoria = formData.novaCategoria || formData.categoria;
+    const newCategory = normalizeCategoryName(formData.novaCategoria);
+    const selectedCategory = normalizeCategoryName(formData.categoria);
+    const categoria = newCategory || selectedCategory;
+
     if (!categoria) {
       toast.error('Selecione ou crie uma categoria.');
+      return;
+    }
+
+    if (newCategory && hasCategoryNameConflict(newCategory)) {
+      toast.error('Essa categoria já existe. Selecione ela na lista.');
+      return;
+    }
+
+    if (newCategory && !formData.newCategoryImage) {
+      toast.error('Para nova categoria, envie a imagem correspondente.');
       return;
     }
 
@@ -215,6 +415,25 @@ export default function AdminStock() {
     e.preventDefault();
     if (!editingProduct) return;
 
+    const newCategory = normalizeCategoryName(formData.novaCategoria);
+    const selectedCategory = normalizeCategoryName(formData.categoria);
+    const categoria = newCategory || selectedCategory;
+
+    if (!categoria) {
+      toast.error('Selecione ou crie uma categoria.');
+      return;
+    }
+
+    if (newCategory && hasCategoryNameConflict(newCategory)) {
+      toast.error('Essa categoria já existe. Selecione ela na lista.');
+      return;
+    }
+
+    if (newCategory && !formData.newCategoryImage) {
+      toast.error('Para nova categoria, envie a imagem correspondente.');
+      return;
+    }
+
     toast.loading('Atualizando produto...', { id: 'edit-product' });
     const success = await pm.updateProduct(
       editingProduct.id,
@@ -225,7 +444,7 @@ export default function AdminStock() {
         preco_embalagem: parseFloat(formData.preco_embalagem) || 0,
         unidade: formData.unidade,
         imagens: formData.imagens,
-        categoria: formData.novaCategoria || formData.categoria,
+        categoria,
       },
       formData.newCategoryImage
     );
@@ -340,6 +559,58 @@ export default function AdminStock() {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
+        </div>
+
+        <div className="rounded-xl border border-slate-700/60 bg-slate-800/50 p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-white">Gestão de Categorias</h2>
+              <p className="text-xs text-slate-400">Crie, edite e exclua categorias com imagem e vínculo automático.</p>
+            </div>
+            <Button onClick={openCreateCategoryModal} className="h-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3">
+              <Plus size={14} className="mr-1" /> Nova Categoria
+            </Button>
+          </div>
+
+          <div className="grid gap-2">
+            {categorySummaries.map((category) => (
+              <div key={category.name} className="rounded-lg border border-slate-700 bg-slate-900/60 p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {category.image ? (
+                    <img src={category.image} alt={category.name} className="w-12 h-12 rounded-lg object-cover border border-slate-700" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg border border-slate-700 bg-slate-800 flex items-center justify-center text-slate-300 font-semibold uppercase">
+                      {category.name.slice(0, 1)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{category.name}</p>
+                    <p className="text-xs text-slate-400">{category.productCount} produto(s) vinculado(s)</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => openEditCategoryModal(category.name)} className="h-8 w-8 p-0 text-slate-300 hover:text-blue-300">
+                    <Edit3 size={14} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => openDeleteCategoryDialog(category.name)}
+                    className="h-8 w-8 p-0 text-slate-300 hover:text-red-400"
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              </div>
+            ))}
+
+            {categorySummaries.length === 0 && (
+              <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-4 text-center text-sm text-slate-400">
+                Nenhuma categoria cadastrada.
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-2">
@@ -543,6 +814,134 @@ export default function AdminStock() {
                 )}
               </Button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {categoryModalMode && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeCategoryModal} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                {categoryModalMode === 'create' ? 'Nova Categoria' : 'Editar Categoria'}
+              </h2>
+              <button
+                onClick={closeCategoryModal}
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                aria-label="Fechar modal de categoria"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={categoryModalMode === 'create' ? handleCreateCategory : handleEditCategory} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Nome da categoria *</label>
+                <Input
+                  value={categoryForm.name}
+                  onChange={(e) => setCategoryForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ex: Higiene e Beleza"
+                  required
+                  className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Imagem da categoria *</label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-indigo-500 hover:text-indigo-400">
+                  <Upload size={14} />
+                  Upload da imagem
+                  <input type="file" accept="image/*" className="hidden" onChange={handleManagedCategoryImageUpload} />
+                </label>
+                <p className="text-[11px] text-slate-500 mt-1">Use imagem em proporção 1:1 para manter padrão visual.</p>
+
+                {categoryForm.image && (
+                  <div className="mt-2 w-28">
+                    <div className="aspect-square rounded-lg overflow-hidden border border-slate-700/60 bg-slate-800/60">
+                      <img src={categoryForm.image} alt="Prévia da categoria" className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <Button type="submit" disabled={pm.loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-10 rounded-xl font-semibold">
+                {pm.loading ? 'Salvando...' : categoryModalMode === 'create' ? 'Criar Categoria' : 'Salvar Categoria'}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deleteCategoryTarget && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[75] flex items-center justify-center p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full space-y-4">
+            <div className="text-center">
+              <AlertTriangle size={40} className="text-amber-400 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-white mb-1">Excluir categoria</h3>
+              <p className="text-slate-400 text-sm">
+                {(() => {
+                  const linkedCount = categorySummaries.find((item) => item.name === deleteCategoryTarget)?.productCount || 0;
+                  if (linkedCount > 0) {
+                    return `A categoria "${deleteCategoryTarget}" possui ${linkedCount} produto(s) vinculado(s).`;
+                  }
+                  return `Confirmar remoção da categoria "${deleteCategoryTarget}"?`;
+                })()}
+              </p>
+            </div>
+
+            {(() => {
+              const linkedCount = categorySummaries.find((item) => item.name === deleteCategoryTarget)?.productCount || 0;
+              const moveTargets = categories.filter((item) => item !== deleteCategoryTarget);
+              return linkedCount > 0 ? (
+                <div className="space-y-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
+                  <label className="flex items-center gap-2 text-sm text-slate-200">
+                    <input
+                      type="radio"
+                      checked={deleteCategoryAction === 'move'}
+                      onChange={() => setDeleteCategoryAction('move')}
+                      disabled={moveTargets.length === 0}
+                    />
+                    Mover produtos para outra categoria
+                  </label>
+
+                  <select
+                    value={deleteCategoryMoveTarget}
+                    onChange={(e) => setDeleteCategoryMoveTarget(e.target.value)}
+                    disabled={deleteCategoryAction !== 'move' || moveTargets.length === 0}
+                    className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-3 h-9"
+                  >
+                    {moveTargets.length === 0 ? (
+                      <option value="">Sem categoria de destino disponível</option>
+                    ) : (
+                      moveTargets.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))
+                    )}
+                  </select>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-200">
+                    <input
+                      type="radio"
+                      checked={deleteCategoryAction === 'unlink'}
+                      onChange={() => setDeleteCategoryAction('unlink')}
+                    />
+                    Remover vínculo (enviar para "{UNLINK_FALLBACK_CATEGORY}")
+                  </label>
+                </div>
+              ) : null;
+            })()}
+
+            <div className="flex gap-3">
+              <Button variant="ghost" onClick={closeDeleteCategoryDialog} className="flex-1 h-10 rounded-xl text-slate-400">
+                Cancelar
+              </Button>
+              <Button onClick={handleDeleteCategory} className="flex-1 bg-red-600 hover:bg-red-700 text-white h-10 rounded-xl">
+                <Trash2 size={14} className="mr-1" /> Excluir
+              </Button>
+            </div>
           </div>
         </div>
       )}

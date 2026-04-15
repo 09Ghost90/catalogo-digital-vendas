@@ -51,12 +51,203 @@ export function useAuth() {
   return { isAuthenticated, login, logout };
 }
 
+type CategoryActionResult = {
+  success: boolean;
+  error?: string;
+};
+
+type DeleteCategoryOptions = {
+  categoryName: string;
+  strategy: 'unlink' | 'move';
+  targetCategory?: string;
+};
+
+function normalizeCategoryName(value: string): string {
+  return value.trim().replace(/\s+/g, ' ');
+}
+
+function equalsCategory(a: string, b: string): boolean {
+  return normalizeCategoryName(a).toLowerCase() === normalizeCategoryName(b).toLowerCase();
+}
+
 /**
  * Supabase-backed product manager.
  * All CRUD operations go directly to the cloud database.
  */
 export function useProductManager() {
   const [loading, setLoading] = useState(false);
+
+  const fetchAllCategoryNames = useCallback(async (): Promise<string[]> => {
+    const [productsRes, categoryImagesRes] = await Promise.all([
+      supabase.from('products').select('categoria'),
+      supabase.from('category_images').select('categoria'),
+    ]);
+
+    if (productsRes.error) throw productsRes.error;
+    if (categoryImagesRes.error) throw categoryImagesRes.error;
+
+    const names = new Set<string>();
+    (productsRes.data || []).forEach((row: any) => {
+      const name = normalizeCategoryName(String(row.categoria || ''));
+      if (name) names.add(name);
+    });
+    (categoryImagesRes.data || []).forEach((row: any) => {
+      const name = normalizeCategoryName(String(row.categoria || ''));
+      if (name) names.add(name);
+    });
+
+    return Array.from(names);
+  }, []);
+
+  const createCategory = useCallback(async (name: string, imageUrl: string): Promise<CategoryActionResult> => {
+    setLoading(true);
+    try {
+      const categoryName = normalizeCategoryName(name);
+      if (!categoryName) {
+        return { success: false, error: 'Nome da categoria é obrigatório.' };
+      }
+
+      const image = imageUrl?.trim();
+      if (!image) {
+        return { success: false, error: 'Imagem da categoria é obrigatória.' };
+      }
+
+      const existing = await fetchAllCategoryNames();
+      if (existing.some((item) => equalsCategory(item, categoryName))) {
+        return { success: false, error: 'Já existe uma categoria com este nome.' };
+      }
+
+      const { error } = await supabase
+        .from('category_images')
+        .insert({ categoria: categoryName, image_url: image });
+
+      if (error) throw error;
+      return { success: true };
+    } catch (err: any) {
+      console.error('Erro ao criar categoria:', err);
+      return { success: false, error: err?.message || 'Erro ao criar categoria.' };
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchAllCategoryNames]);
+
+  const updateCategory = useCallback(async (
+    oldName: string,
+    nextName: string,
+    imageUrl?: string
+  ): Promise<CategoryActionResult> => {
+    setLoading(true);
+    try {
+      const fromCategory = normalizeCategoryName(oldName);
+      const toCategory = normalizeCategoryName(nextName);
+
+      if (!fromCategory || !toCategory) {
+        return { success: false, error: 'Nome da categoria é obrigatório.' };
+      }
+
+      const existing = await fetchAllCategoryNames();
+      const targetExists = existing.some(
+        (item) => !equalsCategory(item, fromCategory) && equalsCategory(item, toCategory)
+      );
+      if (targetExists) {
+        return { success: false, error: 'Já existe uma categoria com este nome.' };
+      }
+
+      if (!equalsCategory(fromCategory, toCategory)) {
+        const { error: moveProductsError } = await supabase
+          .from('products')
+          .update({ categoria: toCategory })
+          .eq('categoria', fromCategory);
+        if (moveProductsError) throw moveProductsError;
+      }
+
+      const { data: fromCategoryImage, error: fromCategoryImageError } = await supabase
+        .from('category_images')
+        .select('image_url')
+        .eq('categoria', fromCategory)
+        .maybeSingle();
+      if (fromCategoryImageError) throw fromCategoryImageError;
+
+      const finalImage = imageUrl?.trim() || fromCategoryImage?.image_url || '';
+
+      if (finalImage) {
+        const { error: upsertCategoryImageError } = await supabase
+          .from('category_images')
+          .upsert({ categoria: toCategory, image_url: finalImage });
+        if (upsertCategoryImageError) throw upsertCategoryImageError;
+      }
+
+      if (!equalsCategory(fromCategory, toCategory)) {
+        const { error: deleteOldCategoryImageError } = await supabase
+          .from('category_images')
+          .delete()
+          .eq('categoria', fromCategory);
+        if (deleteOldCategoryImageError) throw deleteOldCategoryImageError;
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('Erro ao atualizar categoria:', err);
+      return { success: false, error: err?.message || 'Erro ao atualizar categoria.' };
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchAllCategoryNames]);
+
+  const deleteCategory = useCallback(async (options: DeleteCategoryOptions): Promise<CategoryActionResult> => {
+    setLoading(true);
+    try {
+      const categoryName = normalizeCategoryName(options.categoryName);
+      if (!categoryName) {
+        return { success: false, error: 'Categoria inválida.' };
+      }
+
+      const { data: linkedProducts, error: linkedProductsError } = await supabase
+        .from('products')
+        .select('id')
+        .eq('categoria', categoryName);
+      if (linkedProductsError) throw linkedProductsError;
+
+      const linkedCount = (linkedProducts || []).length;
+      if (linkedCount > 0) {
+        if (options.strategy === 'move') {
+          const targetCategory = normalizeCategoryName(options.targetCategory || '');
+          if (!targetCategory) {
+            return { success: false, error: 'Selecione uma categoria de destino.' };
+          }
+          if (equalsCategory(targetCategory, categoryName)) {
+            return { success: false, error: 'A categoria de destino deve ser diferente.' };
+          }
+
+          const { error: moveProductsError } = await supabase
+            .from('products')
+            .update({ categoria: targetCategory })
+            .eq('categoria', categoryName);
+          if (moveProductsError) throw moveProductsError;
+        } else {
+          const fallbackCategory = 'Sem categoria';
+          const { error: unlinkProductsError } = await supabase
+            .from('products')
+            .update({ categoria: fallbackCategory })
+            .eq('categoria', categoryName);
+          if (unlinkProductsError) throw unlinkProductsError;
+        }
+      }
+
+      const { error: deleteCategoryImageError } = await supabase
+        .from('category_images')
+        .delete()
+        .eq('categoria', categoryName);
+      if (deleteCategoryImageError) throw deleteCategoryImageError;
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('Erro ao excluir categoria:', err);
+      return { success: false, error: err?.message || 'Erro ao excluir categoria.' };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const addProduct = useCallback(async (
     product: Omit<Produto, 'id'>,
@@ -187,6 +378,9 @@ export function useProductManager() {
     addProduct,
     removeProduct,
     updateProduct,
+    createCategory,
+    updateCategory,
+    deleteCategory,
     uploadImage,
   };
 }
