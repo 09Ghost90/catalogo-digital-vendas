@@ -144,6 +144,12 @@ export default function AdminStock() {
     });
   };
 
+  const closeProductModal = () => {
+    setShowAddForm(false);
+    setEditingProduct(null);
+    resetForm();
+  };
+
   const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -391,48 +397,44 @@ export default function AdminStock() {
       </div>
 
       {(showAddForm || editingProduct) && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeProductModal} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white">{editingProduct ? 'Editar Produto' : 'Novo Produto'}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowAddForm(false);
-                  setEditingProduct(null);
-                  resetForm();
-                }}
-                className="text-slate-400 h-8 w-8 p-0"
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white">{editingProduct ? 'Editar Produto' : 'Novo Produto'}</h2>
+              <button
+                onClick={closeProductModal}
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                aria-label="Fechar modal de produto"
               >
-                <X size={18} />
-              </Button>
+                <X size={18} className="text-gray-500" />
+              </button>
             </div>
             <form onSubmit={editingProduct ? handleEdit : handleAdd} className="space-y-4">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Nome do Produto *</label>
+                <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Nome do Produto *</label>
                 <Input
                   value={formData.nome}
                   onChange={(e) => setFormData((p) => ({ ...p, nome: e.target.value }))}
                   required
-                  className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl"
+                  className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Nome Completo</label>
+                <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label>
                 <Input
                   value={formData.nome_completo}
                   onChange={(e) => setFormData((p) => ({ ...p, nome_completo: e.target.value }))}
-                  className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl"
+                  className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Categoria *</label>
+                  <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Categoria *</label>
                   <select
                     value={formData.categoria}
                     onChange={(e) => setFormData((p) => ({ ...p, categoria: e.target.value }))}
-                    className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 h-9"
+                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white text-sm rounded-xl px-3 h-9"
                   >
                     <option value="">Selecionar...</option>
                     {categories.map((c) => (
@@ -441,18 +443,18 @@ export default function AdminStock() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Ou criar nova</label>
+                  <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Ou criar nova</label>
                   <Input
                     value={formData.novaCategoria}
                     onChange={(e) => setFormData((p) => ({ ...p, novaCategoria: e.target.value }))}
                     placeholder="Nova categoria..."
-                    className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl"
+                    className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                   />
                 </div>
               </div>
               {formData.novaCategoria && (
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Foto da Categoria</label>
+                  <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Foto da Categoria</label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm text-blue-400 hover:text-blue-300">
                     <Upload size={14} /> Anexar imagem da categoria
                     <input type="file" accept="image/*" className="hidden" onChange={handleCategoryImageUpload} />
@@ -464,32 +466,32 @@ export default function AdminStock() {
               )}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Preço Unit. *</label>
+                  <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Preço Unit. *</label>
                   <Input
                     type="number"
                     step="0.01"
                     value={formData.preco_unitario}
                     onChange={(e) => setFormData((p) => ({ ...p, preco_unitario: e.target.value }))}
                     required
-                    className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl"
+                    className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Preço Emb.</label>
+                  <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Preço Emb.</label>
                   <Input
                     type="number"
                     step="0.01"
                     value={formData.preco_embalagem}
                     onChange={(e) => setFormData((p) => ({ ...p, preco_embalagem: e.target.value }))}
-                    className="bg-slate-900 border-slate-700 text-white h-9 rounded-xl"
+                    className="rounded-xl dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Unidade</label>
+                  <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Unidade</label>
                   <select
                     value={formData.unidade}
                     onChange={(e) => setFormData((p) => ({ ...p, unidade: e.target.value }))}
-                    className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 h-9"
+                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white text-sm rounded-xl px-3 h-9"
                   >
                     <option value="Un.">Un.</option>
                     <option value="Dz.">Dz. (12)</option>
@@ -501,7 +503,7 @@ export default function AdminStock() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Fotos do Produto (até 5)</label>
+                <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Fotos do Produto (até 5)</label>
                 <label className="flex items-center gap-2 cursor-pointer text-sm text-emerald-400 hover:text-emerald-300">
                   <ImageIcon size={14} /> Adicionar fotos
                   <input type="file" accept="image/*" multiple className="hidden" onChange={handleProductImageUpload} />

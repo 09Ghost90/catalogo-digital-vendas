@@ -146,6 +146,11 @@ export default function AdminCreateOrder() {
       }
       return [...prev, { source: 'catalog', priceMode: 'unitario', product, quantity: 1 }];
     });
+
+    toast.success(`${product.nome.substring(0, 25)}… adicionado!`, {
+      duration: 1500,
+      position: 'bottom-center',
+    });
   };
 
   const addManualProduct = () => {
@@ -357,8 +362,11 @@ export default function AdminCreateOrder() {
                 className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 h-9"
               >
                 <option value="Un.">Un.</option>
-                <option value="Dz.">Dz.</option>
-                <option value="Cx.">Cx.</option>
+                <option value="Dz.">Dz. (12)</option>
+                <option value="Ct.">Ct. (10)</option>
+                <option value="Cx.">Cx. (10)</option>
+                <option value="Pct.">Pct.</option>
+                <option value="Mt.">Mt.</option>
               </select>
               <Input
                 type="number"

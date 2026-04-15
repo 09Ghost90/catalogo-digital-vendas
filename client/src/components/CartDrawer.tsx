@@ -176,24 +176,18 @@ export default function CartDrawer({ cart, open, onOpenChange, whatsappNumber, c
                 {/* Payment Method */}
                 <div className="w-full">
                   <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Forma de Pagamento</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={cart.paymentMethod}
+                    onChange={(e) => cart.setPaymentMethod(e.target.value as PaymentMethod)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-medium bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Selecione uma forma de pagamento</option>
                     {PAYMENT_OPTIONS.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => cart.setPaymentMethod(
-                          cart.paymentMethod === option.value ? '' as PaymentMethod : option.value
-                        )}
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                          cart.paymentMethod === option.value
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 shadow-sm'
-                            : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-400 hover:border-blue-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800/50'
-                        }`}
-                      >
-                        <span className="text-base">{option.icon}</span>
-                        <span className="truncate">{option.label}</span>
-                      </button>
+                      <option key={option.value} value={option.value}>
+                        {option.icon} {option.label}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
 
                 {/* Total */}
