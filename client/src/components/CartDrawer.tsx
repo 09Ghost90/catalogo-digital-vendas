@@ -184,7 +184,7 @@ export default function CartDrawer({ cart, open, onOpenChange, whatsappNumber, c
                     <option value="">Selecione uma forma de pagamento</option>
                     {PAYMENT_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
-                        {option.icon} {option.label}
+                        {option.label}
                       </option>
                     ))}
                   </select>
