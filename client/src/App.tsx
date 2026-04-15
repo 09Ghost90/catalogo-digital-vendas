@@ -22,21 +22,13 @@ function Router() {
       <Route path={"/home"} component={Landing} />
       <Route path={"/landing"} component={Landing} />
       <Route path={"/login"} component={Login} />
-      <Route path={"/admin/"}>
-        <Redirect to="/admin" />
-      </Route>
+      <Route path={"/admin/"} component={Admin} />
       <Route path={"/admin"} component={Admin} />
-      <Route path={"/admin/estoque/"}>
-        <Redirect to="/admin/estoque" />
-      </Route>
+      <Route path={"/admin/estoque/"} component={AdminStock} />
       <Route path={"/admin/estoque"} component={AdminStock} />
-      <Route path={"/admin/criar-pedido/"}>
-        <Redirect to="/admin/criar-pedido" />
-      </Route>
+      <Route path={"/admin/criar-pedido/"} component={AdminCreateOrder} />
       <Route path={"/admin/criar-pedido"} component={AdminCreateOrder} />
-      <Route path={"/admin/pedidos/"}>
-        <Redirect to="/admin/pedidos" />
-      </Route>
+      <Route path={"/admin/pedidos/"} component={AdminOrders} />
       <Route path={"/admin/pedidos"} component={AdminOrders} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
