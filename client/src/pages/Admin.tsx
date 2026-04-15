@@ -1,4 +1,4 @@
-import { ArrowLeft, Box, ClipboardList, LogOut, ShoppingCart } from 'lucide-react';
+import { Box, ClipboardList, House, LogOut, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAdmin';
 import { useCatalog } from '@/hooks/useCatalog';
@@ -35,9 +35,13 @@ export default function Admin() {
       <div className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <a href="/" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-              <ArrowLeft size={14} />
-              Início
+            <a
+              href="/"
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition-colors"
+              title="Voltar para início"
+              aria-label="Voltar para início"
+            >
+              <House size={16} />
             </a>
             <h1 className="text-lg font-bold text-white">Administrativo</h1>
           </div>

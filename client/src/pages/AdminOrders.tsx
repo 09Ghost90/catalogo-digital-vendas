@@ -1,9 +1,17 @@
-import { ArrowLeft, LogOut, MessageCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, LogOut, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAdmin';
 import { useOrders } from '@/hooks/useOrders';
 import type { AdminOrder, OrderStatus } from '@/hooks/useOrders';
 import { toast } from 'sonner';
+
+function WhatsAppIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20.5 3.5A11.86 11.86 0 0 0 12.05 0C5.5 0 .14 5.35.14 11.9c0 2.1.55 4.15 1.6 5.96L0 24l6.3-1.64a11.88 11.88 0 0 0 5.74 1.47h.01c6.55 0 11.9-5.35 11.9-11.9 0-3.18-1.24-6.16-3.45-8.43ZM12.05 21.8h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.73.97 1-3.64-.23-.37a9.9 9.9 0 0 1-1.52-5.28c0-5.46 4.44-9.9 9.9-9.9 2.64 0 5.12 1.03 6.98 2.9a9.82 9.82 0 0 1 2.9 7c0 5.45-4.44 9.9-9.9 9.9Zm5.43-7.42c-.3-.15-1.77-.87-2.04-.98-.27-.1-.47-.15-.67.16-.2.3-.77.98-.95 1.18-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5a9.08 9.08 0 0 1-1.67-2.08c-.18-.3-.02-.46.13-.62.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.5l-.57-.01c-.2 0-.53.08-.8.38-.27.3-1.04 1.01-1.04 2.46s1.07 2.86 1.22 3.06c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.71.23 1.35.2 1.85.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.18-1.42-.08-.11-.28-.18-.58-.33Z" />
+    </svg>
+  );
+}
 
 function formatWhatsAppPhone(phone: string): string {
   const digits = phone.replace(/\D/g, '');
@@ -64,9 +72,13 @@ export default function AdminOrders() {
       <div className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <a href="/admin" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-              <ArrowLeft size={14} />
-              Administrativo
+            <a
+              href="/admin"
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition-colors"
+              title="Voltar para administrativo"
+              aria-label="Voltar para administrativo"
+            >
+              <ArrowLeft size={16} />
             </a>
             <h1 className="text-lg font-bold text-white">Pedidos</h1>
           </div>
@@ -106,7 +118,7 @@ export default function AdminOrders() {
                         className="h-8 w-8 p-0 text-slate-400 hover:text-green-400"
                         title="Compartilhar no WhatsApp"
                       >
-                        <MessageCircle size={14} />
+                        <WhatsAppIcon size={15} />
                       </Button>
                       <select
                         value={order.status}
