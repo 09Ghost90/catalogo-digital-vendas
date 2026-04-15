@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal, UserPlus, Edit3, Package, Eye, Phone, UserCircle2, LogIn } from 'lucide-react';
+import { Search, Filter, MessageCircle, ChevronDown, ShoppingCart, Plus, X, SlidersHorizontal, UserPlus, Edit3, Package, Eye, UserCircle2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -30,7 +30,32 @@ export default function Home() {
 
   const cart = useCart(data?.whatsapp || '');
   const customer = useCustomer();
-  const allCategories = Object.keys(data?.categorias || {}).sort();
+  const allCategories = useMemo(
+    () =>
+      Object.keys(data?.categorias || {}).sort((a, b) =>
+        a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+      ),
+    [data?.categorias]
+  );
+  const contactWhatsAppUrl = useMemo(() => {
+    const cleanPhone = data?.whatsapp?.replace(/\D/g, '') || '';
+    const message = encodeURIComponent('Olá! Gostaria de falar com a equipe de vendas.');
+    return `https://wa.me/55${cleanPhone}?text=${message}`;
+  }, [data?.whatsapp]);
+  const formattedWhatsApp = useMemo(() => {
+    const cleanPhone = data?.whatsapp?.replace(/\D/g, '') || '';
+    const localNumber = cleanPhone.length > 11 ? cleanPhone.slice(-11) : cleanPhone;
+
+    if (localNumber.length === 11) {
+      return `(${localNumber.slice(0, 2)}) ${localNumber.slice(2, 7)}-${localNumber.slice(7)}`;
+    }
+
+    if (localNumber.length === 10) {
+      return `(${localNumber.slice(0, 2)}) ${localNumber.slice(2, 6)}-${localNumber.slice(6)}`;
+    }
+
+    return data?.whatsapp || '';
+  }, [data?.whatsapp]);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [simpleLoginOpen, setSimpleLoginOpen] = useState(false);
   const [simpleLoginContact, setSimpleLoginContact] = useState('');
@@ -73,6 +98,14 @@ export default function Home() {
     });
     return grouped;
   }, [filteredProducts]);
+
+  const groupedCategories = useMemo(
+    () =>
+      Object.entries(groupedByCategory).sort(([a], [b]) =>
+        a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+      ),
+    [groupedByCategory]
+  );
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -165,7 +198,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
       {/* Profile Modal */}
       {profileModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -433,15 +466,24 @@ export default function Home() {
             )}
 
             <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-100 dark:border-green-900/30">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Fale conosco</p>
-              <p className="font-semibold text-green-700 dark:text-green-400 text-sm">{data.whatsapp}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Fale conosco</p>
+              <a
+                href={contactWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 hover:bg-green-700 text-white px-3 py-2 text-sm font-semibold transition-colors"
+              >
+                <MessageCircle size={15} />
+                Contate-nos no WhatsApp
+              </a>
+              <p className="mt-2 text-center text-xs font-medium text-green-700 dark:text-green-400">{formattedWhatsApp}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Main Content */}
-      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <main className="container mx-auto w-full flex-1 px-3 sm:px-4 py-4 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-8">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block lg:col-span-1">
@@ -485,11 +527,17 @@ export default function Home() {
               )}
 
               <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-100 dark:border-green-900/30">
-                <div className="flex items-center gap-2 mb-1">
-                  <Phone size={14} className="text-green-600 dark:text-green-400" />
-                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Fale conosco</p>
-                </div>
-                <p className="font-bold text-green-700 dark:text-green-400 text-base tracking-wide">{data.whatsapp}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2">Fale conosco</p>
+                <a
+                  href={contactWhatsAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 hover:bg-green-700 text-white px-3 py-2 text-sm font-semibold transition-colors"
+                >
+                  <MessageCircle size={15} />
+                  Contate-nos no WhatsApp
+                </a>
+                <p className="mt-2 text-center text-xs font-medium text-green-700 dark:text-green-400">{formattedWhatsApp}</p>
               </div>
             </div>
           </aside>
@@ -511,15 +559,15 @@ export default function Home() {
               <div className="space-y-6">
                 {/* Category Card Grid */}
                 {!expandedCategory && (
-                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
-                    {Object.entries(groupedByCategory).map(([category, products]) => (
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {groupedCategories.map(([category, products]) => (
                       <button
                         key={category}
                         onClick={() => setExpandedCategory(category)}
                         className="group bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 border border-gray-100 dark:border-slate-800 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-200 dark:hover:border-blue-800 text-left flex flex-col"
                       >
-                        {/* Category Image — 70% of card */}
-                        <div className="w-full aspect-[4/3] overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 dark:from-slate-800 dark:to-slate-700 relative">
+                        {/* Category Image — reduced ~20% to improve spacing perception */}
+                        <div className="w-full aspect-[5/3] overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 dark:from-slate-800 dark:to-slate-700 relative">
                           {data.categoryImages[category] ? (
                             <img
                               src={data.categoryImages[category]}
@@ -528,20 +576,20 @@ export default function Home() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-blue-200 dark:text-slate-600">
-                              <Package size={48} />
+                              <Package size={40} />
                             </div>
                           )}
                           {/* Products count badge */}
-                          <span className="absolute bottom-2 right-2 text-[10px] sm:text-xs font-semibold bg-black/60 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
+                          <span className="absolute bottom-1.5 right-1.5 text-[10px] sm:text-xs font-semibold bg-black/60 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
                             {products.length} produto{products.length !== 1 ? 's' : ''}
                           </span>
                         </div>
                         {/* Title + CTA */}
-                        <div className="p-3 sm:p-4 flex flex-col items-center gap-2 flex-1">
-                          <h3 className="font-bold text-gray-800 dark:text-gray-100 text-xs sm:text-sm text-center leading-tight">
+                        <div className="p-2.5 sm:p-3 flex flex-col items-center gap-1.5 flex-1">
+                          <h3 className="font-bold text-gray-800 dark:text-gray-100 text-[11px] sm:text-xs text-center leading-tight">
                             {category}
                           </h3>
-                          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 transition-colors duration-300 mt-auto">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-full group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 transition-colors duration-300 mt-auto">
                             <Eye size={12} /> Explorar
                           </span>
                         </div>
