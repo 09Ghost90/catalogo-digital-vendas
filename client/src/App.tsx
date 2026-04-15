@@ -16,6 +16,10 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/categoria/"}>
+        <Redirect to="/categoria" />
+      </Route>
+      <Route path={"/categoria"} component={Home} />
       <Route path={"/catalogo"}>
         <Redirect to="/" />
       </Route>

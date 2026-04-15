@@ -18,10 +18,13 @@ import type { CustomerProfile } from '@/hooks/useCustomer';
 import { useCatalog } from '@/hooks/useCatalog';
 import type { Produto } from '@/hooks/useCatalog';
 import { toast } from 'sonner';
+import { useLocation } from 'wouter';
 
 export default function Home() {
+  const [location] = useLocation();
   const { data, loading: catalogLoading, error: catalogError } = useCatalog();
   const [searchTerm, setSearchTerm] = useState('');
+  const [categorySearchTerm, setCategorySearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'nome' | 'preco'>('nome');
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
@@ -31,6 +34,14 @@ export default function Home() {
   const cart = useCart(data?.whatsapp || '');
   const customer = useCustomer();
   const allCategories = Object.keys(data?.categorias || {}).sort();
+  const isCategoriaRoute = location === '/categoria' || location.startsWith('/categoria?');
+  const normalizedCategorySearch = categorySearchTerm.trim().toLowerCase();
+  const visibleCategories = useMemo(() => {
+    if (!normalizedCategorySearch) return allCategories;
+    return allCategories.filter((category) =>
+      category.toLowerCase().includes(normalizedCategorySearch)
+    );
+  }, [allCategories, normalizedCategorySearch]);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [simpleLoginOpen, setSimpleLoginOpen] = useState(false);
   const [simpleLoginContact, setSimpleLoginContact] = useState('');
@@ -39,8 +50,13 @@ export default function Home() {
   const filteredProducts = useMemo(() => {
     if (!data) return [];
     let products: Produto[] = [];
+    const selectedVisibleCategories = selectedCategories.filter((category) =>
+      visibleCategories.includes(category)
+    );
     const categoriesToShow =
-      selectedCategories.length === 0 ? allCategories : selectedCategories;
+      selectedVisibleCategories.length === 0
+        ? visibleCategories
+        : selectedVisibleCategories;
 
     categoriesToShow.forEach((cat) => {
       products = [...products, ...(data.categorias[cat] || [])];
@@ -61,7 +77,7 @@ export default function Home() {
     }
 
     return products;
-  }, [data, searchTerm, selectedCategories, sortBy, allCategories]);
+  }, [data, searchTerm, selectedCategories, sortBy, visibleCategories]);
 
   const groupedByCategory = useMemo(() => {
     const grouped: Record<string, Produto[]> = {};
@@ -400,7 +416,19 @@ export default function Home() {
             </div>
 
             <div className="space-y-1">
-              {allCategories.map((category) => (
+              {isCategoriaRoute && (
+                <div className="mb-3">
+                  <Input
+                    type="text"
+                    value={categorySearchTerm}
+                    onChange={(e) => setCategorySearchTerm(e.target.value)}
+                    placeholder="Filtrar categorias..."
+                    className="h-9 rounded-xl border-blue-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+              )}
+
+              {visibleCategories.map((category) => (
                 <label
                   key={category}
                   className="flex items-center gap-3 cursor-pointer group p-2 rounded-lg hover:bg-blue-50/50 dark:hover:bg-slate-800/50 transition-colors"
@@ -421,9 +449,13 @@ export default function Home() {
               ))}
             </div>
 
-            {selectedCategories.length > 0 && (
+            {(selectedCategories.length > 0 || categorySearchTerm) && (
               <Button
-                onClick={() => { setSelectedCategories([]); setFiltersOpen(false); }}
+                onClick={() => {
+                  setSelectedCategories([]);
+                  setCategorySearchTerm('');
+                  setFiltersOpen(false);
+                }}
                 variant="outline"
                 size="sm"
                 className="w-full mt-4 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl"
@@ -451,8 +483,20 @@ export default function Home() {
                 Categorias
               </h2>
 
+              {isCategoriaRoute && (
+                <div className="mb-3">
+                  <Input
+                    type="text"
+                    value={categorySearchTerm}
+                    onChange={(e) => setCategorySearchTerm(e.target.value)}
+                    placeholder="Filtrar categorias..."
+                    className="h-9 rounded-xl border-blue-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+              )}
+
               <div className="space-y-0.5">
-                {allCategories.map((category) => (
+                {visibleCategories.map((category) => (
                   <label
                     key={category}
                     className="flex items-center gap-3 cursor-pointer group px-2 py-2 rounded-lg hover:bg-blue-50/60 dark:hover:bg-slate-800/50 transition-colors"
@@ -473,9 +517,12 @@ export default function Home() {
                 ))}
               </div>
 
-              {selectedCategories.length > 0 && (
+              {(selectedCategories.length > 0 || categorySearchTerm) && (
                 <Button
-                  onClick={() => setSelectedCategories([])}
+                  onClick={() => {
+                    setSelectedCategories([]);
+                    setCategorySearchTerm('');
+                  }}
                   variant="outline"
                   size="sm"
                   className="w-full mt-4 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl"
