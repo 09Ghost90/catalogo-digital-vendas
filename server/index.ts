@@ -10,6 +10,14 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  app.use((req, res, next) => {
+    const host = req.headers.host?.split(":")[0];
+    if (host === "armarinhospereira.com") {
+      return res.redirect(301, `https://www.armarinhospereira.com${req.originalUrl || "/"}`);
+    }
+    return next();
+  });
+
   // Serve static files from dist/public in production
   const staticPath =
     process.env.NODE_ENV === "production"
