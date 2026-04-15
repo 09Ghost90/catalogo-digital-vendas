@@ -20,14 +20,25 @@ function parseStockKey(key: string): { categoria: string; id: number | null } {
 
 export function useStockManager() {
   const [stockMap, setStockMap] = useState<Record<string, number>>({});
+  const [remoteStockAvailable, setRemoteStockAvailable] = useState<boolean | null>(null);
 
   const syncFromSupabase = useCallback(async () => {
+    if (remoteStockAvailable === false) return;
+
     try {
       const { data, error } = await supabase
         .from('products')
         .select('id, categoria, estoque');
 
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === '42703') {
+          setRemoteStockAvailable(false);
+          console.warn('Coluna products.estoque ausente no Supabase. Aplicar migration para sincronizar entre dispositivos.');
+          return;
+        }
+        throw error;
+      }
+      setRemoteStockAvailable(true);
 
       const remoteMap: Record<string, number> = {};
       (data || []).forEach((row: any) => {
@@ -40,7 +51,7 @@ export function useStockManager() {
     } catch (error) {
       console.error('Erro ao sincronizar estoque do Supabase:', error);
     }
-  }, []);
+  }, [remoteStockAvailable]);
 
   useEffect(() => {
     try {
@@ -92,17 +103,24 @@ export function useStockManager() {
       const next = { ...stockMap, [key]: safeQty };
       persist(next);
 
+      if (remoteStockAvailable !== true) return;
+
       void supabase
         .from('products')
         .update({ estoque: safeQty })
         .eq('id', id)
         .then(({ error }) => {
           if (error) {
+            if ((error as any).code === '42703') {
+              setRemoteStockAvailable(false);
+              console.warn('Coluna products.estoque ausente no Supabase. Aplicar migration para sincronizar entre dispositivos.');
+              return;
+            }
             console.error('Erro ao atualizar estoque no Supabase:', error);
           }
         });
     },
-    [stockMap, persist]
+    [stockMap, persist, remoteStockAvailable]
   );
 
   const remapCategory = useCallback(
