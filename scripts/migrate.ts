@@ -2,11 +2,19 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 
-// Get credentials from args or env
-const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://cyndrewvgegsxyloihng.supabase.co';
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bmRyZXd2Z2Vnc3h5bG9paG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjg0NDEsImV4cCI6MjA5MTcwNDQ0MX0.ApppQPQ8opZ5jtB_lU9PPlnHZ8qzcNKjVLDwJBGpiqw';
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    'Missing Supabase credentials. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (preferred) or SUPABASE_ANON_KEY.'
+  );
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function migrate() {
   console.log('Iniciando migração para o Supabase...');

@@ -110,3 +110,9 @@ temp/
 
 # Manus version file (auto-generated, not part of source)
 client/public/__manus__/version.json
+
+# Catalog import local artifacts
+catalogo_completo.json
+catalogo_completo.csv
+Livro Atacado/
+produtos_atacado/
